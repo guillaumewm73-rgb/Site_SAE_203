@@ -118,6 +118,7 @@ a {
 .button-secondary {
     background: rgba(7, 17, 20, 0.92);
     color: var(--white);
+    -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
 }
 
