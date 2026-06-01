@@ -9,6 +9,7 @@ if (!function_exists('e')) {
 
 $pageTitle = $pageTitle ?? 'e-llusion - Exposition MMI';
 $activePage = $activePage ?? '';
+$bodyClass = $bodyClass ?? '';
 $reserveHref = $reserveHref ?? 'inscription.php';
 $extraScripts = $extraScripts ?? [];
 $navLinks = $navLinks ?? [
@@ -29,7 +30,7 @@ $navLinks = $navLinks ?? [
         <script src="<?= e($script); ?>" defer></script>
     <?php endforeach; ?>
 </head>
-<body>
+<body class="<?= e($bodyClass); ?>">
     <header class="site-header">
         <a class="brand" href="index.php" aria-label="Retour à l'accueil">
             <span class="brand-line"></span>

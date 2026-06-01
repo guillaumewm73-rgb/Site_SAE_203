@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/includes/room-data.php';
+
+$roomCatalog = getRoomCatalog();
+
 $visitDays = [
     'jeudi' => [
         'label' => 'Jeudi 18 juin',
@@ -15,24 +19,14 @@ $visitDays = [
     ],
 ];
 
-$rooms = [
-    '001' => [
-        'tp' => 'TP12',
-        'title' => 'Miroirs numériques',
-    ],
-    '002' => [
-        'tp' => 'TP21',
-        'title' => 'Société parfaite ?',
-    ],
-    '005' => [
-        'tp' => 'TP22',
-        'title' => 'Présences augmentées',
-    ],
-    '021' => [
-        'tp' => 'TP11',
-        'title' => 'Identités numériques',
-    ],
-];
+$rooms = [];
+
+foreach ($roomCatalog as $roomNumber => $room) {
+    $rooms[$roomNumber] = [
+        'tp' => $room['supportLabel'],
+        'title' => $room['title'],
+    ];
+}
 
 $availability = [];
 
