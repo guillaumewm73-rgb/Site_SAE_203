@@ -716,6 +716,10 @@ a {
     cursor: pointer;
 }
 
+.day-choice-info {
+    cursor: default;
+}
+
 .day-choice input {
     position: absolute;
     opacity: 0;

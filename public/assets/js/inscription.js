@@ -2,23 +2,9 @@ const registrationDataElement = document.getElementById('registration-data');
 const registrationData = JSON.parse(registrationDataElement.textContent);
 
 const form = document.querySelector('[data-registration-form]');
-const dayToggles = Array.from(document.querySelectorAll('[data-day-toggle]'));
 const slotList = document.querySelector('[data-slot-list]');
 const addSlotButton = document.querySelector('[data-add-slot]');
 const feedback = document.querySelector('[data-form-feedback]');
-
-function getSelectedDays() {
-    const selectedDays = dayToggles
-        .filter((toggle) => toggle.checked)
-        .map((toggle) => toggle.value);
-
-    if (selectedDays.length > 0) {
-        return selectedDays;
-    }
-
-    dayToggles[0].checked = true;
-    return [dayToggles[0].value];
-}
 
 function fillTimeOptions(timeSelect, day, currentValue) {
     const times = registrationData.days[day].times;
@@ -43,7 +29,6 @@ function updateSlotNames(slot, index) {
 }
 
 function updateSlot(slot, index) {
-    const selectedDays = getSelectedDays();
     const daySelect = slot.querySelector('[data-slot-day]');
     const timeSelect = slot.querySelector('[data-slot-time]');
     const roomSelect = slot.querySelector('[data-slot-room]');
@@ -51,14 +36,6 @@ function updateSlot(slot, index) {
     const capacity = slot.querySelector('[data-slot-capacity]');
     const title = slot.querySelector('[data-slot-title]');
     const removeButton = slot.querySelector('[data-remove-slot]');
-
-    Array.from(daySelect.options).forEach((option) => {
-        option.disabled = !selectedDays.includes(option.value);
-    });
-
-    if (!selectedDays.includes(daySelect.value)) {
-        daySelect.value = selectedDays[0];
-    }
 
     fillTimeOptions(timeSelect, daySelect.value, timeSelect.value);
     updateSlotNames(slot, index);
@@ -93,10 +70,6 @@ function updateAllSlots() {
     });
 }
 
-dayToggles.forEach((toggle) => {
-    toggle.addEventListener('change', updateAllSlots);
-});
-
 slotList.addEventListener('change', (event) => {
     if (event.target.matches('[data-slot-day], [data-slot-time], [data-slot-room], [data-slot-people]')) {
         updateAllSlots();
@@ -113,10 +86,9 @@ slotList.addEventListener('click', (event) => {
 });
 
 addSlotButton.addEventListener('click', () => {
-    const selectedDays = getSelectedDays();
     const newSlot = slotList.firstElementChild.cloneNode(true);
 
-    newSlot.querySelector('[data-slot-day]').value = selectedDays[0];
+    newSlot.querySelector('[data-slot-day]').value = Object.keys(registrationData.days)[0];
     newSlot.querySelector('[data-slot-room]').value = '001';
     newSlot.querySelector('[data-slot-people]').value = '1';
     slotList.appendChild(newSlot);

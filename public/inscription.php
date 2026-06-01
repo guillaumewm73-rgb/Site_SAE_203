@@ -87,23 +87,16 @@ require __DIR__ . '/includes/header.php';
 
                 <fieldset class="registration-block">
                     <legend>1. Jours de visite</legend>
-                    <p>Sélectionnez un jour ou les deux selon votre parcours.</p>
+                    <p>Les visites sont proposées sur les deux journées suivantes. Le choix du jour se fait ensuite dans chaque créneau.</p>
                     <div class="day-choice-grid">
-                        <?php foreach ($visitDays as $dayKey => $day): ?>
-                            <label class="day-choice">
-                                <input
-                                    type="checkbox"
-                                    name="selected_days[]"
-                                    value="<?= e($dayKey); ?>"
-                                    data-day-toggle
-                                    <?= $dayKey === 'jeudi' ? 'checked' : ''; ?>
-                                >
+                        <?php foreach ($visitDays as $day): ?>
+                            <article class="day-choice day-choice-info">
                                 <span class="red-dot"></span>
                                 <span>
                                     <strong><?= e($day['label']); ?></strong>
                                     <small><?= e($day['date']); ?></small>
                                 </span>
-                            </label>
+                            </article>
                         <?php endforeach; ?>
                     </div>
                 </fieldset>
