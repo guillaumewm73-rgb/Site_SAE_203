@@ -437,6 +437,14 @@ a {
     color: var(--muted);
 }
 
+.footer-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 24px;
+    max-width: 620px;
+}
+
 .footer-links {
     display: flex;
     flex-wrap: wrap;
@@ -456,6 +464,28 @@ a {
 .footer-links a:hover {
     border-color: var(--red);
     color: var(--red);
+}
+
+.footer-logos {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 30px;
+    width: 100%;
+}
+
+.footer-logo {
+    display: block;
+    width: auto;
+    object-fit: contain;
+}
+
+.footer-logo-iut {
+    height: 58px;
+}
+
+.footer-logo-mmi {
+    height: 52px;
 }
 
 .placeholder-page {
@@ -685,6 +715,17 @@ a {
 
     .footer-links {
         justify-content: flex-start;
+    }
+
+    .footer-actions {
+        align-items: flex-start;
+        max-width: none;
+        width: 100%;
+    }
+
+    .footer-logos {
+        justify-content: flex-start;
+        flex-wrap: wrap;
     }
 
     .contact-card-main,
