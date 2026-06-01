@@ -3,4 +3,3 @@ config/database.php
 vendor/
 node_modules/
 *.log
-config.php
