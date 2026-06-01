@@ -3,7 +3,7 @@ require_once('config.php');
 
 try {
     $conn = new PDO(
-        "mysql:host=" . SERVEUR_BD . ";port=" . PORT_BD . ";dbname=" . NOM_BD . ";charset=utf8mb4",
+        "mysql:host=" . SERVEUR_BD . ";dbname=" . NOM_BD . ";charset=utf8mb4",
         LOGIN_BD,
         PASSE_BD
     );
