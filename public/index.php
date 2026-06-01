@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 $slides = [
     [
-        'image' => 'assets/images/carousel-1.svg',
-        'alt' => 'Image de substitution pour le carrousel e-llusion',
+        'image' => 'assets/images/carousel-expo-1.jpg',
+        'alt' => 'Salle immersive avec projections inspirées de La Nuit étoilée',
     ],
     [
-        'image' => 'assets/images/carousel-2.svg',
-        'alt' => 'Deuxième image de substitution pour le carrousel e-llusion',
+        'image' => 'assets/images/carousel-expo-2.jpg',
+        'alt' => 'Installation lumineuse immersive avec projections colorées',
     ],
     [
-        'image' => 'assets/images/carousel-3.svg',
-        'alt' => 'Troisième image de substitution pour le carrousel e-llusion',
+        'image' => 'assets/images/carousel-expo-3.jpg',
+        'alt' => 'Exposition immersive avec grandes fresques projetées',
     ],
     [
-        'image' => 'assets/images/carousel-4.svg',
-        'alt' => 'Quatrième image de substitution pour le carrousel e-llusion',
+        'image' => 'assets/images/carousel-expo-4.webp',
+        'alt' => 'Parcours de musée futuriste avec projections au sol',
     ],
 ];
 
