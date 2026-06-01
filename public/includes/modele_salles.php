@@ -41,22 +41,28 @@ $nextRoom = $currentRoomIndex !== false && $currentRoomIndex < count($roomNumber
         </section>
 
         <section class="room-toolbar" aria-label="Navigation de la salle">
-            <nav class="room-section-nav" aria-label="Sections de la salle">
-                <a href="#concept" data-room-nav-link>Concept</a>
-                <a href="#oeuvres" data-room-nav-link>Œuvres</a>
-                <a href="#infos" data-room-nav-link>Infos</a>
-            </nav>
+            <div class="room-toolbar-group">
+                <span class="room-toolbar-label">Sections</span>
+                <nav class="room-section-nav" aria-label="Sections de la salle">
+                    <a href="#concept" data-room-nav-link>Concept</a>
+                    <a href="#oeuvres" data-room-nav-link>Œuvres</a>
+                    <a href="#parcours" data-room-nav-link>Parcours</a>
+                </nav>
+            </div>
 
-            <div class="room-switcher" aria-label="Autres salles du parcours">
-                <?php foreach ($roomNumbers as $roomNumber): ?>
-                    <?php $roomLink = getRoomByNumber($roomNumber); ?>
-                    <a
-                        class="<?= $roomNumber === $room['number'] ? 'is-current' : ''; ?>"
-                        href="<?= e($roomLink['slug']); ?>"
-                    >
-                        Salle <?= e($roomNumber); ?>
-                    </a>
-                <?php endforeach; ?>
+            <div class="room-toolbar-group">
+                <span class="room-toolbar-label">Autres salles</span>
+                <div class="room-switcher" aria-label="Autres salles du parcours">
+                    <?php foreach ($roomNumbers as $roomNumber): ?>
+                        <?php $roomLink = getRoomByNumber($roomNumber); ?>
+                        <a
+                            class="<?= $roomNumber === $room['number'] ? 'is-current' : ''; ?>"
+                            href="<?= e($roomLink['slug']); ?>"
+                        >
+                            Salle <?= e($roomNumber); ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
             </div>
         </section>
 
@@ -95,33 +101,28 @@ $nextRoom = $currentRoomIndex !== false && $currentRoomIndex < count($roomNumber
                 </div>
             </section>
 
-            <section class="room-panel" id="infos" data-room-section>
-                <div class="room-info-grid">
-                    <article class="room-info-card">
-                        <h2>Repères</h2>
-                        <ul>
-                            <li><?= e($room['supportLabel']); ?></li>
-                            <li><?= count($room['works']); ?> œuvre(s) présentée(s)</li>
-                            <li>Réservation et contact depuis la page inscription</li>
-                        </ul>
-                    </article>
+            <section class="room-panel room-panel-end" id="parcours" data-room-section>
+                <div class="room-endcard">
+                    <div class="room-endcard-copy">
+                        <p class="eyebrow">Parcours</p>
+                        <h2>Continuez la visite</h2>
+                        <p>
+                            Passez à la salle suivante, revenez à la précédente ou retrouvez
+                            toutes les salles sur la page d’accueil.
+                        </p>
+                    </div>
 
-                    <article class="room-info-card room-info-card-dark">
-                        <h2>Parcours</h2>
-                        <p>Utilisez les boutons ci-dessous pour naviguer entre les quatre salles du site.</p>
+                    <div class="room-pager">
+                        <?php if ($previousRoom): ?>
+                            <a class="button button-secondary" href="<?= e($previousRoom['slug']); ?>">Salle précédente</a>
+                        <?php endif; ?>
 
-                        <div class="room-pager">
-                            <?php if ($previousRoom): ?>
-                                <a class="button button-secondary" href="<?= e($previousRoom['slug']); ?>">Salle précédente</a>
-                            <?php endif; ?>
+                        <a class="button button-primary" href="index.php#salles">Accueil des salles</a>
 
-                            <a class="button button-primary" href="index.php#salles">Accueil des salles</a>
-
-                            <?php if ($nextRoom): ?>
-                                <a class="button button-secondary" href="<?= e($nextRoom['slug']); ?>">Salle suivante</a>
-                            <?php endif; ?>
-                        </div>
-                    </article>
+                        <?php if ($nextRoom): ?>
+                            <a class="button button-secondary" href="<?= e($nextRoom['slug']); ?>">Salle suivante</a>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </section>
         </section>
