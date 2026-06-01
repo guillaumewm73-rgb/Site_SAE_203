@@ -486,6 +486,92 @@ a {
     line-height: 1.5;
 }
 
+.contact-page {
+    background: var(--cyan-pale);
+    color: var(--black);
+}
+
+.contact-hero {
+    min-height: 280px;
+    padding: 68px 88px 38px;
+    background: var(--black);
+    color: var(--white);
+}
+
+.contact-hero h1 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+.contact-hero h2 {
+    max-width: 920px;
+    margin: 0 0 22px;
+    font-size: clamp(46px, 5.6vw, 86px);
+    line-height: 0.88;
+    letter-spacing: 0;
+}
+
+.contact-hero p:not(.eyebrow) {
+    max-width: 560px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1.35;
+}
+
+.contact-section {
+    min-height: 320px;
+    padding: 48px 88px 44px;
+    background: var(--cyan-pale);
+}
+
+.contact-card {
+    padding: 30px 34px;
+    background: var(--white);
+    color: var(--black);
+    border: 1px solid var(--cyan);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.contact-card-main {
+    max-width: 470px;
+    margin: 0 auto 28px;
+}
+
+.contact-card h2 {
+    margin: 0 0 14px;
+    font-size: 25px;
+}
+
+.contact-card p {
+    margin: 0 0 12px;
+    color: var(--black);
+    font-size: 15px;
+    line-height: 1.45;
+}
+
+.contact-card a:not(.button) {
+    color: var(--black);
+    font-weight: 800;
+}
+
+.contact-card a:not(.button):hover {
+    color: var(--red);
+}
+
+.contact-back {
+    display: flex;
+    width: 170px;
+    min-height: 44px;
+    margin: 0 auto;
+    font-size: 13px;
+}
+
 @media (max-width: 980px) {
     .site-header {
         align-items: flex-start;
@@ -580,7 +666,9 @@ a {
     .rooms-section,
     .reservation-preview,
     .site-footer,
-    .placeholder-page {
+    .placeholder-page,
+    .contact-hero,
+    .contact-section {
         padding-left: 24px;
         padding-right: 24px;
     }
@@ -597,6 +685,12 @@ a {
 
     .footer-links {
         justify-content: flex-start;
+    }
+
+    .contact-card-main,
+    .contact-back {
+        margin-left: 0;
+        margin-right: 0;
     }
 }
 
@@ -625,5 +719,17 @@ a {
 
     .hero h1 {
         font-size: 58px;
+    }
+
+    .contact-hero h2 {
+        font-size: 40px;
+    }
+
+    .contact-hero p:not(.eyebrow) {
+        font-size: 17px;
+    }
+
+    .contact-card {
+        padding: 24px;
     }
 }

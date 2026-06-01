@@ -69,7 +69,7 @@ $navLinks = [
     ['key' => 'accueil', 'label' => 'Accueil', 'href' => 'index.php'],
     ['key' => 'salles', 'label' => 'Salles', 'href' => '#salles'],
     ['key' => 'creneaux', 'label' => 'Créneaux', 'href' => '#creneaux'],
-    ['key' => 'contact', 'label' => 'Contact', 'href' => '#contact'],
+    ['key' => 'contact', 'label' => 'Contact', 'href' => 'contact.php'],
 ];
 
 require __DIR__ . '/includes/header.php';

@@ -15,7 +15,7 @@ $navLinks = $navLinks ?? [
     ['key' => 'accueil', 'label' => 'Accueil', 'href' => 'index.php'],
     ['key' => 'salles', 'label' => 'Salles', 'href' => 'index.php#salles'],
     ['key' => 'inscription', 'label' => 'Inscription', 'href' => 'inscription.php'],
-    ['key' => 'contact', 'label' => 'Contact', 'href' => 'index.php#contact'],
+    ['key' => 'contact', 'label' => 'Contact', 'href' => 'contact.php'],
 ];
 ?>
 <!doctype html>
