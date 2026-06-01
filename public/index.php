@@ -21,7 +21,7 @@ $slides = [
     ],
 ];
 
-require __DIR__ . '/includes/room-data.php';
+require __DIR__ . '/includes/donnee_salles.php';
 
 $days = [
     [

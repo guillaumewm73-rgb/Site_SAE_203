@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/includes/room-data.php';
+require __DIR__ . '/includes/donnee_salles.php';
 
 $room = getRoomByNumber('005');
 $pageTitle = 'Salle 005 - ' . $room['title'] . ' - e-llusion';
