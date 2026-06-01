@@ -492,8 +492,8 @@ a {
 }
 
 .contact-hero {
-    min-height: 280px;
-    padding: 68px 88px 38px;
+    min-height: 192px;
+    padding: 44px 88px 26px;
     background: var(--black);
     color: var(--white);
 }
@@ -509,9 +509,9 @@ a {
 
 .contact-hero h2 {
     max-width: 920px;
-    margin: 0 0 22px;
-    font-size: clamp(46px, 5.6vw, 86px);
-    line-height: 0.88;
+    margin: 0 0 16px;
+    font-size: clamp(42px, 4.2vw, 58px);
+    line-height: 0.92;
     letter-spacing: 0;
 }
 
@@ -519,12 +519,12 @@ a {
     max-width: 560px;
     margin: 0;
     color: var(--muted);
-    font-size: 18px;
+    font-size: 15px;
     line-height: 1.35;
 }
 
 .contact-section {
-    min-height: 320px;
+    min-height: 480px;
     padding: 48px 88px 44px;
     background: var(--cyan-pale);
 }
