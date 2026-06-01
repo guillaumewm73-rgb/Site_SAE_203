@@ -61,39 +61,19 @@ $rooms = [
     ],
 ];
 
-function e(string $value): string
-{
-    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-}
+$pageTitle = 'e-llusion - Exposition MMI';
+$activePage = 'accueil';
+$reserveHref = '#reservation';
+$extraScripts = ['assets/js/home.js'];
+$navLinks = [
+    ['key' => 'accueil', 'label' => 'Accueil', 'href' => 'index.php'],
+    ['key' => 'salles', 'label' => 'Salles', 'href' => '#salles'],
+    ['key' => 'creneaux', 'label' => 'Créneaux', 'href' => '#creneaux'],
+    ['key' => 'contact', 'label' => 'Contact', 'href' => '#contact'],
+];
+
+require __DIR__ . '/includes/header.php';
 ?>
-<!doctype html>
-<html lang="fr">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>e-llusion - Exposition MMI</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <script src="assets/js/home.js" defer></script>
-</head>
-<body>
-    <header class="site-header">
-        <a class="brand" href="index.php" aria-label="Retour à l'accueil">
-            <span class="brand-line"></span>
-            <span>e-llusion</span>
-        </a>
-
-        <nav class="main-nav" aria-label="Navigation principale">
-            <a class="is-active" href="index.php">Accueil</a>
-            <a href="#salles">Salles</a>
-            <a href="#creneaux">Créneaux</a>
-            <a href="#contact">Contact</a>
-        </nav>
-
-        <div class="header-actions">
-            <span>18 &amp; 19 juin 2026</span>
-            <a class="button button-primary" href="#reservation">Réserver</a>
-        </div>
-    </header>
 
     <main>
         <section class="hero" aria-labelledby="hero-title">
@@ -195,17 +175,4 @@ function e(string $value): string
         </section>
     </main>
 
-    <footer class="site-footer" id="contact">
-        <div>
-            <h2>e-llusion</h2>
-            <p>Exposition d’œuvres multimédia interactives des étudiant·es MMI.</p>
-            <p>28 Av du Lac d’Annecy, 73370 Le Bourget-du-Lac</p>
-        </div>
-        <div class="footer-links">
-            <a href="https://www.instagram.com/mmichambery/" target="_blank" rel="noreferrer">Instagram MMI</a>
-            <a href="https://mmi.univ-smb.fr/" target="_blank" rel="noreferrer">Site web MMI</a>
-            <a href="mailto:mmi-chambery@univ-smb.fr">mmi-chambery@univ-smb.fr</a>
-        </div>
-    </footer>
-</body>
-</html>
+<?php require __DIR__ . '/includes/footer.php'; ?>
