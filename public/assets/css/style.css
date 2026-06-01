@@ -1,3 +1,11 @@
+@font-face {
+    font-family: "CutePixel";
+    src: url("../fonts/CutePixel.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
 :root {
     --black: #000000;
     --panel: #071114;
@@ -197,6 +205,8 @@ a {
 }
 
 .hero h1 {
+    font-family: "CutePixel", Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-weight: 400;
     margin: 20px 0 24px;
     font-size: clamp(70px, 6.6vw, 112px);
     line-height: 0.9;
@@ -509,6 +519,8 @@ a {
 }
 
 .placeholder-page h1 {
+    font-family: "CutePixel", Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-weight: 400;
     margin: 12px 0 24px;
     font-size: 72px;
     line-height: 0.9;
@@ -542,6 +554,8 @@ a {
 }
 
 .contact-hero h2 {
+    font-family: "CutePixel", Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-weight: 400;
     max-width: 920px;
     margin: 0 0 16px;
     font-size: clamp(42px, 4.2vw, 58px);
@@ -619,6 +633,8 @@ a {
 }
 
 .registration-hero h1 {
+    font-family: "CutePixel", Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-weight: 400;
     margin: 18px 0 18px;
     font-size: clamp(62px, 6vw, 96px);
     line-height: 0.9;
