@@ -61,11 +61,11 @@ require __DIR__ . '/includes/header.php';
 
     <main class="registration-page">
         <section class="registration-hero" aria-labelledby="registration-title">
-            <p class="eyebrow">Réservation individuelle</p>
+            <p class="eyebrow">Réservation de visite</p>
             <h1 id="registration-title">Inscription</h1>
             <p>
                 Composez votre visite en choisissant un ou plusieurs créneaux.
-                L’inscription reste individuelle : chaque visiteur remplit son propre formulaire.
+                Indiquez le nombre de personnes présentes, puis choisissez votre moyen de confirmation.
             </p>
         </section>
 
@@ -76,7 +76,7 @@ require __DIR__ . '/includes/header.php';
                         <h2>Composer votre visite</h2>
                         <p>
                             Sélectionnez un ou les deux jours, puis ajoutez les créneaux souhaités.
-                            La jauge indique les places restantes pour chaque salle.
+                            La jauge indique les places restantes selon la salle, l’heure et le nombre de personnes.
                         </p>
                     </div>
                     <aside class="registration-alert">
@@ -148,6 +148,15 @@ require __DIR__ . '/includes/header.php';
                                         <?php endforeach; ?>
                                     </select>
                                 </label>
+
+                                <label>
+                                    <span>Nombre de personnes</span>
+                                    <select name="slots[0][people]" data-slot-people>
+                                        <?php for ($people = 1; $people <= 12; $people++): ?>
+                                            <option value="<?= $people; ?>"><?= $people; ?></option>
+                                        <?php endfor; ?>
+                                    </select>
+                                </label>
                             </div>
 
                             <div class="slot-capacity" data-slot-capacity></div>
@@ -165,10 +174,10 @@ require __DIR__ . '/includes/header.php';
                         <label>
                             <span>Qui êtes-vous ?</span>
                             <select name="visitor_type" required>
-                                <option value="visiteur">Visiteur·se</option>
-                                <option value="etudiant">Étudiant·e MMI</option>
-                                <option value="personnel">Personnel IUT</option>
-                                <option value="autre">Autre</option>
+                                <option value="enseignant">Enseignant</option>
+                                <option value="personnel_usmb">Personnel de l’USMB</option>
+                                <option value="visiteur_exterieur">Visiteur extérieur</option>
+                                <option value="professionnel_partenaire">Professionnel / partenaire</option>
                             </select>
                         </label>
 
@@ -183,13 +192,38 @@ require __DIR__ . '/includes/header.php';
                         </label>
 
                         <label>
-                            <span>Email de confirmation</span>
-                            <input type="email" name="email" autocomplete="email" required>
+                            <span>Email ou téléphone</span>
+                            <input
+                                type="text"
+                                name="contact_value"
+                                autocomplete="email tel"
+                                placeholder="prenom.nom@email.fr ou 06 00 00 00 00"
+                                required
+                            >
+                        </label>
+                    </div>
+                </fieldset>
+
+                <fieldset class="registration-block buffet-block">
+                    <legend>4. Buffet</legend>
+                    <p>Indiquez si vous serez présent·e au buffet organisé le jeudi à 19h.</p>
+                    <div class="buffet-choice-grid">
+                        <label class="buffet-choice">
+                            <input type="radio" name="participates_buffet" value="1">
+                            <span class="red-dot"></span>
+                            <span>
+                                <strong>Oui, je serai présent·e</strong>
+                                <small>Prévoir une place pour le buffet.</small>
+                            </span>
                         </label>
 
-                        <label>
-                            <span>Téléphone</span>
-                            <input type="tel" name="phone" autocomplete="tel" placeholder="Optionnel">
+                        <label class="buffet-choice">
+                            <input type="radio" name="participates_buffet" value="0" checked>
+                            <span class="red-dot"></span>
+                            <span>
+                                <strong>Non, je ne participe pas</strong>
+                                <small>Réservation uniquement pour la visite.</small>
+                            </span>
                         </label>
                     </div>
                 </fieldset>

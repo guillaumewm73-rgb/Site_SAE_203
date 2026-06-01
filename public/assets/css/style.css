@@ -735,6 +735,45 @@ a {
     box-shadow: inset 0 0 0 1px var(--cyan-dark);
 }
 
+.buffet-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.buffet-choice {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 96px;
+    padding: 18px;
+    background: var(--cyan-pale);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.buffet-choice input {
+    position: absolute;
+    opacity: 0;
+}
+
+.buffet-choice strong,
+.buffet-choice small {
+    display: block;
+}
+
+.buffet-choice small {
+    margin-top: 5px;
+}
+
+.buffet-choice:has(input:checked) {
+    border-color: var(--cyan-dark);
+    box-shadow: inset 0 0 0 1px var(--cyan-dark);
+}
+
 .slot-list {
     display: grid;
     gap: 18px;
@@ -781,7 +820,7 @@ a {
 .slot-fields,
 .visitor-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 18px;
 }
 
@@ -1098,7 +1137,8 @@ a {
         padding: 20px;
     }
 
-    .day-choice-grid {
+    .day-choice-grid,
+    .buffet-choice-grid {
         grid-template-columns: 1fr;
     }
 

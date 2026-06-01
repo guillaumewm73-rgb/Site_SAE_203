@@ -39,6 +39,7 @@ function updateSlotNames(slot, index) {
     slot.querySelector('[data-slot-day]').name = `slots[${index}][day]`;
     slot.querySelector('[data-slot-time]').name = `slots[${index}][time]`;
     slot.querySelector('[data-slot-room]').name = `slots[${index}][room]`;
+    slot.querySelector('[data-slot-people]').name = `slots[${index}][people]`;
 }
 
 function updateSlot(slot, index) {
@@ -46,6 +47,7 @@ function updateSlot(slot, index) {
     const daySelect = slot.querySelector('[data-slot-day]');
     const timeSelect = slot.querySelector('[data-slot-time]');
     const roomSelect = slot.querySelector('[data-slot-room]');
+    const peopleSelect = slot.querySelector('[data-slot-people]');
     const capacity = slot.querySelector('[data-slot-capacity]');
     const title = slot.querySelector('[data-slot-title]');
     const removeButton = slot.querySelector('[data-remove-slot]');
@@ -63,18 +65,24 @@ function updateSlot(slot, index) {
 
     const key = `${daySelect.value}|${timeSelect.value}|${roomSelect.value}`;
     const remainingPlaces = registrationData.availability[key] ?? 12;
-    const percentage = Math.max(0, Math.min(100, (remainingPlaces / 12) * 100));
+    const selectedPeople = Number(peopleSelect.value);
+    const placesAfterSelection = remainingPlaces - selectedPeople;
+    const percentage = Math.max(0, Math.min(100, (placesAfterSelection / 12) * 100));
     const room = registrationData.rooms[roomSelect.value];
 
     title.textContent = `Créneau ${index + 1}`;
     removeButton.hidden = slotList.children.length === 1;
 
-    capacity.classList.toggle('is-low', remainingPlaces <= 3 && remainingPlaces > 0);
-    capacity.classList.toggle('is-full', remainingPlaces === 0);
+    capacity.classList.toggle('is-low', placesAfterSelection <= 3 && placesAfterSelection > 0);
+    capacity.classList.toggle('is-full', placesAfterSelection < 0);
+
+    const capacityMessage = placesAfterSelection < 0
+        ? `Pas assez de places pour ${selectedPeople} personnes.`
+        : `${placesAfterSelection} places restantes après votre sélection.`;
 
     capacity.innerHTML = `
         <strong>Salle ${roomSelect.value} - ${timeSelect.value}</strong>
-        <span>${room.title} · ${remainingPlaces} places restantes sur 12</span>
+        <span>${room.title} · ${remainingPlaces} places disponibles sur 12 · ${capacityMessage}</span>
         <i aria-hidden="true"><b style="width: ${percentage}%"></b></i>
     `;
 }
@@ -90,7 +98,7 @@ dayToggles.forEach((toggle) => {
 });
 
 slotList.addEventListener('change', (event) => {
-    if (event.target.matches('[data-slot-day], [data-slot-time], [data-slot-room]')) {
+    if (event.target.matches('[data-slot-day], [data-slot-time], [data-slot-room], [data-slot-people]')) {
         updateAllSlots();
     }
 });
@@ -110,6 +118,7 @@ addSlotButton.addEventListener('click', () => {
 
     newSlot.querySelector('[data-slot-day]').value = selectedDays[0];
     newSlot.querySelector('[data-slot-room]').value = '001';
+    newSlot.querySelector('[data-slot-people]').value = '1';
     slotList.appendChild(newSlot);
     updateAllSlots();
 });
@@ -121,8 +130,20 @@ form.addEventListener('submit', (event) => {
         return;
     }
 
+    const hasOverbookedSlot = Array.from(document.querySelectorAll('[data-slot-capacity]'))
+        .some((capacity) => capacity.classList.contains('is-full'));
+
+    if (hasOverbookedSlot) {
+        feedback.textContent = 'Réduisez le nombre de personnes : au moins un créneau dépasse les places disponibles.';
+        feedback.classList.remove('is-success');
+        return;
+    }
+
     const slotCount = slotList.children.length;
-    feedback.textContent = `Votre demande est prête : ${slotCount} créneau${slotCount > 1 ? 'x' : ''} pour 1 visiteur.`;
+    const peopleCount = Array.from(document.querySelectorAll('[data-slot-people]'))
+        .reduce((total, select) => total + Number(select.value), 0);
+
+    feedback.textContent = `Votre demande est prête : ${slotCount} créneau${slotCount > 1 ? 'x' : ''}, ${peopleCount} personne${peopleCount > 1 ? 's' : ''} au total.`;
     feedback.classList.add('is-success');
 });
 

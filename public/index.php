@@ -113,7 +113,7 @@ require __DIR__ . '/includes/header.php';
         <section class="visit-section" id="creneaux" aria-labelledby="visit-title">
             <div class="section-heading">
                 <h2 id="visit-title">Créneaux de visite</h2>
-                <p>Chaque créneau est limité à 12 visiteurs par salle. Le visiteur s’inscrit uniquement pour lui-même.</p>
+                <p>Chaque créneau est limité à 12 visiteurs par salle. Le formulaire permet d’indiquer le nombre de personnes présentes.</p>
             </div>
 
             <div class="capacity-banner">
@@ -162,7 +162,7 @@ require __DIR__ . '/includes/header.php';
                 <h2 id="reservation-title">Composer votre visite</h2>
                 <p>
                     Ajoutez un créneau, choisissez le jour, l’heure et la salle.
-                    L’inscription reste individuelle : 1 formulaire = 1 visiteur.
+                    Vous pouvez réserver une ou plusieurs places selon les disponibilités.
                 </p>
             </div>
             <a class="button button-primary" href="inscription.php">Commencer l’inscription</a>
