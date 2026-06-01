@@ -21,6 +21,8 @@ $slides = [
     ],
 ];
 
+require __DIR__ . '/includes/room-data.php';
+
 $days = [
     [
         'label' => 'Jeudi',
@@ -34,32 +36,7 @@ $days = [
     ],
 ];
 
-$rooms = [
-    [
-        'number' => '001',
-        'tp' => 'TP12',
-        'title' => 'Miroirs numériques',
-        'description' => 'Un dédale de reflets, d’écrans et de perceptions qui se déforment.',
-    ],
-    [
-        'number' => '002',
-        'tp' => 'TP21',
-        'title' => 'Société parfaite ?',
-        'description' => 'Un parcours qui questionne l’image sociale, le contrôle et la mise en scène.',
-    ],
-    [
-        'number' => '005',
-        'tp' => 'TP22',
-        'title' => 'Présences augmentées',
-        'description' => 'Des présences invisibles apparaissent selon les actions du public.',
-    ],
-    [
-        'number' => '021',
-        'tp' => 'TP11',
-        'title' => 'Identités numériques',
-        'description' => 'Une réflexion sur le regard des autres et la validation sociale.',
-    ],
-];
+$rooms = getHomeRoomCards();
 
 $pageTitle = 'e-llusion - Exposition MMI';
 $activePage = 'accueil';
@@ -148,10 +125,10 @@ require __DIR__ . '/includes/header.php';
                             <span class="red-dot"></span>
                             <h3>Salle <?= e($room['number']); ?></h3>
                         </div>
-                        <span class="room-badge"><?= e($room['tp']); ?></span>
+                        <span class="room-badge"><?= e($room['badge']); ?></span>
                         <h4><?= e($room['title']); ?></h4>
                         <p><?= e($room['description']); ?></p>
-                        <a href="#reservation">Voir la salle</a>
+                        <a href="<?= e($room['href']); ?>">Voir la salle</a>
                     </article>
                 <?php endforeach; ?>
             </div>
