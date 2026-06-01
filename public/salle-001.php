@@ -12,5 +12,5 @@ $reserveHref = 'inscription.php';
 $extraScripts = ['assets/js/rooms.js'];
 
 require __DIR__ . '/includes/header.php';
-require __DIR__ . '/includes/room-template.php';
+require __DIR__ . '/includes/modele_salles.php';
 require __DIR__ . '/includes/footer.php';
