@@ -1,9 +1,0 @@
-<svg width="1400" height="720" viewBox="0 0 1400 720" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1400" height="720" fill="#000"/>
-  <rect x="140" y="105" width="460" height="460" rx="20" stroke="#3CE8D7" stroke-width="4"/>
-  <rect x="220" y="185" width="460" height="460" rx="20" stroke="#C5F9F2" stroke-width="3" opacity=".55"/>
-  <rect x="300" y="265" width="460" height="460" rx="20" stroke="#00BBAA" stroke-width="3" opacity=".55"/>
-  <circle cx="1010" cy="350" r="180" stroke="#AF0000" stroke-width="8"/>
-  <circle cx="1010" cy="350" r="120" fill="#3CE8D7" opacity=".18"/>
-  <text x="820" y="372" fill="#C5F9F2" font-size="56" font-family="Arial, sans-serif" font-weight="700">miroirs numériques</text>
-</svg>
