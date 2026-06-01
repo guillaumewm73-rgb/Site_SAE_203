@@ -602,6 +602,288 @@ a {
     font-size: 13px;
 }
 
+.registration-page {
+    background: var(--cyan-pale);
+    color: var(--black);
+}
+
+.registration-hero {
+    min-height: 300px;
+    padding: 58px 88px 48px;
+    background: var(--black);
+    color: var(--white);
+}
+
+.registration-hero h1 {
+    margin: 18px 0 18px;
+    font-size: clamp(62px, 6vw, 96px);
+    line-height: 0.9;
+}
+
+.registration-hero p:not(.eyebrow) {
+    max-width: 720px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 19px;
+    line-height: 1.45;
+}
+
+.registration-section {
+    padding: 58px 88px 72px;
+}
+
+.registration-card {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 34px;
+    background: var(--white);
+    border: 1px solid var(--cyan);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.registration-card-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 28px;
+    margin-bottom: 30px;
+}
+
+.registration-card-header h2 {
+    margin: 0 0 12px;
+    font-size: 34px;
+}
+
+.registration-card-header p,
+.registration-block p {
+    margin: 0;
+    color: var(--black);
+    line-height: 1.45;
+}
+
+.registration-alert {
+    min-width: 230px;
+    padding: 18px;
+    background: var(--black);
+    color: var(--cyan);
+    border-radius: 8px;
+}
+
+.registration-alert strong,
+.registration-alert span {
+    display: block;
+}
+
+.registration-alert strong {
+    margin-bottom: 4px;
+    font-size: 20px;
+}
+
+.registration-block {
+    margin: 0 0 28px;
+    padding: 26px;
+    border: 1px solid var(--cyan);
+    border-radius: 8px;
+}
+
+.registration-block legend {
+    padding: 0 10px;
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.day-choice-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.day-choice {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 96px;
+    padding: 18px;
+    background: var(--cyan-pale);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.day-choice input {
+    position: absolute;
+    opacity: 0;
+}
+
+.day-choice strong,
+.day-choice small {
+    display: block;
+}
+
+.day-choice small {
+    margin-top: 5px;
+}
+
+.day-choice:has(input:checked) {
+    border-color: var(--cyan-dark);
+    box-shadow: inset 0 0 0 1px var(--cyan-dark);
+}
+
+.slot-list {
+    display: grid;
+    gap: 18px;
+    margin-top: 18px;
+}
+
+.slot-entry {
+    padding: 22px;
+    background: var(--black);
+    color: var(--white);
+    border: 1px solid var(--cyan-dark);
+    border-radius: 8px;
+}
+
+.slot-entry-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.slot-entry h3 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.slot-remove {
+    border: 0;
+    background: transparent;
+    color: var(--cyan);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.slot-remove:hover {
+    color: var(--red);
+}
+
+.slot-remove[hidden] {
+    display: none;
+}
+
+.slot-fields,
+.visitor-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.visitor-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.slot-fields label,
+.visitor-grid label {
+    display: grid;
+    gap: 8px;
+    font-weight: 800;
+}
+
+.slot-fields span,
+.visitor-grid span {
+    color: var(--cyan);
+    font-size: 14px;
+}
+
+.visitor-grid span {
+    color: var(--black);
+}
+
+.slot-fields select,
+.visitor-grid select,
+.visitor-grid input {
+    width: 100%;
+    min-height: 50px;
+    padding: 0 14px;
+    border: 1px solid var(--cyan);
+    border-radius: 7px;
+    background: var(--white);
+    color: var(--black);
+    font: inherit;
+}
+
+.slot-capacity {
+    margin-top: 18px;
+    padding: 16px;
+    background: rgba(197, 249, 242, 0.1);
+    border: 1px solid rgba(60, 232, 215, 0.4);
+    border-radius: 8px;
+}
+
+.slot-capacity strong,
+.slot-capacity span,
+.slot-capacity i {
+    display: block;
+}
+
+.slot-capacity strong {
+    margin-bottom: 6px;
+    color: var(--cyan);
+}
+
+.slot-capacity span {
+    color: var(--muted);
+}
+
+.slot-capacity i {
+    height: 8px;
+    margin-top: 12px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+}
+
+.slot-capacity b {
+    display: block;
+    height: 100%;
+    background: var(--cyan);
+}
+
+.slot-capacity.is-low b {
+    background: var(--red);
+}
+
+.slot-capacity.is-full span {
+    color: var(--red);
+}
+
+.add-slot-button {
+    margin-top: 18px;
+}
+
+.visitor-block {
+    margin-bottom: 20px;
+}
+
+.registration-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.registration-footer p {
+    margin: 0;
+    font-weight: 800;
+}
+
+.registration-footer p.is-success {
+    color: var(--cyan-dark);
+}
+
 @media (max-width: 980px) {
     .site-header {
         align-items: flex-start;
@@ -733,6 +1015,27 @@ a {
         margin-left: 0;
         margin-right: 0;
     }
+
+    .registration-hero,
+    .registration-section {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    .registration-card-header,
+    .registration-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .registration-alert {
+        width: 100%;
+    }
+
+    .slot-fields,
+    .visitor-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (max-width: 560px) {
@@ -772,5 +1075,23 @@ a {
 
     .contact-card {
         padding: 24px;
+    }
+
+    .registration-hero h1 {
+        font-size: 54px;
+    }
+
+    .registration-card,
+    .registration-block,
+    .slot-entry {
+        padding: 20px;
+    }
+
+    .day-choice-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .registration-footer .button {
+        width: 100%;
     }
 }
