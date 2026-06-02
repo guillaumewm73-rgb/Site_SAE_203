@@ -58,8 +58,8 @@ require __DIR__ . '/includes/header.php';
             <p class="eyebrow">Espace visiteur</p>
             <h1 id="reservation-login-title">Connexion réservation</h1>
             <p>
-                Vérifiez votre réservation avec le numéro reçu après l'inscription
-                et le moyen de contact utilisé pour la demande.
+                Vérifiez votre réservation avec le numéro de téléphone ou le mail utilisé lors de la réservation. 
+                Renseignez ensuite le mot de passe pour accéder à votre espace personnel et découvrir les détails de votre visite.
             </p>
 
             <div class="hero-buttons">
@@ -73,8 +73,7 @@ require __DIR__ . '/includes/header.php';
                 <article class="auth-card" id="verification">
                     <h2>Connexion à votre compte</h2>
                     <p>
-                        Renseignez le numéro de réservation et le mail ou le téléphone
-                        saisi à l'inscription.
+                        Renseignez le numéro de réservation et le mail ou téléphone utilisé lors de la réservation.
                     </p>
 
                     <form class="auth-form" method="post" action="connexion.php">
