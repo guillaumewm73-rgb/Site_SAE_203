@@ -165,17 +165,17 @@ TEXT,
     ];
 
     $roomGroups = [
-        '001' => 'La PÃ©piniÃ¨re',
-        '002' => "L'Envers du DÃ©cor",
+        '001' => 'La Pépinière',
+        '002' => "L'Envers du Décors",
         '005' => 'Horizon',
         '021' => 'Societ-e',
     ];
 
     $roomSupportLabels = [
-        '001' => 'IdentitÃ©s numÃ©riques â€” TP 2.2 - Lotus / E-biscus / Datura / Å“uvre 4',
-        '002' => 'PrÃ©sences augmentÃ©es â€” TP 2.1 - Tapis Rouge / En Direct / AD-HD',
-        '005' => 'Miroirs numÃ©riques â€” TP 1.1 - Community / Distorsion',
-        '021' => 'SociÃ©tÃ© parfaite ? â€” TP 1.2 - Bon profil / AntithÃ¨se / BeautÃ© hors du cadre',
+        '001' => 'Identités numériques â€” TP 2.2 - Lotus / E-biscus / Datura / Å“uvre 4',
+        '002' => 'Présences augmentées â€” TP 2.1 - Tapis Rouge / En Direct / AD-HD',
+        '005' => 'Miroirs numériques â€” TP 1.1 - Community / Distorsion',
+        '021' => 'Société parfaite ? â€” TP 1.2 - Bon profil / Antithèse / Beauté hors du cadre',
     ];
 
     $catalog = [];
