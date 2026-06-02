@@ -77,7 +77,7 @@ TEXT,
             'heroImage' => 'assets/images/carousel-expo-3.jpg',
             'supportLabel' => 'TP 2.1 - Tapis Rouge / En Direct / AD-HD',
             'summary' => 'Une critique de la société du spectacle, du jugement permanent et de l’économie de l’attention.',
-            'question' => "Comment l'illusion d'une societe parfaite revele-t-elle l'etat de la nôtre ?",
+            'question' => "Comment l'illusion d'une société parfaite révèle-t-elle l'état de la nôtre ?",
             'focus' => 'Regard social, consommation et attention',
             'concept' => <<<'TEXT'
 Le thème principal de notre salle est de questionner les facades que la société se construit pour masquer ses contradictions, qu'il s'agisse du regard social sur les réseaux sociaux, du glamour de la mode ou de la mécanique de la consommation. Les trois oeuvres montrent ainsi comment le numérique, en mettant en scène ces illusions, finit par révéler l'état réel d'un monde qui se rêve parfait.
@@ -157,13 +157,25 @@ TEXT,
         ],
     ];
 
-    
+  $roomOrder = [
+        '001' => '001',
+        '002' => '002',
+        '005' => '005',
+        '021' => '021',
+    ];
+
+    $roomGroups = [
+        '001' => 'La Pépinière',
+        '002' => "L'Envers du Décors",
+        '005' => 'Horizon',
+        '021' => 'Societ-e',
+    ];  
 
     $roomSupportLabels = [
-        '001' => '"Identités numériques” TP 2.2 - Lotus / E-biscus / Datura / Oeuvre 4',
-        '002' => '"Présences augmentées” TP 2.1 - Tapis Rouge / En Direct / AD-HD',
-        '005' => '"Miroirs numériques” TP 1.1 - Community / Distorsion',
-        '021' => '"Société parfaite ?” TP 1.2 - Bon profil / Antithèse / Beauté hors du cadre',
+        '001' => 'La Pépinière” TP 2.2 - Lotus / E-biscus / Datura / Oeuvre 4',
+        '002' => '"L\'Envers du Décors” TP 2.1 - Tapis Rouge / En Direct / AD-HD',
+        '005' => '"Horizon” TP 1.2 - Bon profil / Antithèse / Beauté hors du cadre',
+        '021' => '"Societ-e” TP 1.1 - Community / Distorsion',
     ];
 
     $catalog = [];
