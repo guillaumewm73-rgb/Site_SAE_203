@@ -1015,6 +1015,15 @@ a {
     color: var(--cyan-dark);
 }
 
+.registration-footer p.is-error {
+    color: var(--red);
+}
+
+.registration-footer .button:disabled {
+    cursor: wait;
+    opacity: 0.7;
+}
+
 .auth-page,
 .admin-page {
     background: var(--cyan-pale);

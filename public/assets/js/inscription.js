@@ -5,6 +5,7 @@ const form = document.querySelector('[data-registration-form]');
 const slotList = document.querySelector('[data-slot-list]');
 const addSlotButton = document.querySelector('[data-add-slot]');
 const feedback = document.querySelector('[data-form-feedback]');
+const submitButton = document.querySelector('[data-submit-registration]');
 
 function fillTimeOptions(timeSelect, day, currentValue) {
     const times = registrationData.days[day].times;
@@ -96,8 +97,14 @@ addSlotButton.addEventListener('click', () => {
 });
 
 form.addEventListener('submit', (event) => {
-    if (!form.reportValidity()) {
+    if (!form.checkValidity()) {
         event.preventDefault();
+        const firstInvalidField = form.querySelector(':invalid');
+
+        feedback.textContent = 'Complétez les champs obligatoires avant de confirmer l’inscription.';
+        feedback.classList.remove('is-success');
+        feedback.classList.add('is-error');
+        firstInvalidField?.focus();
         return;
     }
 
@@ -108,6 +115,7 @@ form.addEventListener('submit', (event) => {
         event.preventDefault();
         feedback.textContent = 'Réduisez le nombre de personnes : au moins un créneau dépasse les places disponibles.';
         feedback.classList.remove('is-success');
+        feedback.classList.add('is-error');
         return;
     }
 
@@ -115,8 +123,18 @@ form.addEventListener('submit', (event) => {
     const peopleCount = Array.from(document.querySelectorAll('[data-slot-people]'))
         .reduce((total, select) => total + Number(select.value), 0);
 
-    feedback.textContent = `Votre demande est prête : ${slotCount} créneau${slotCount > 1 ? 'x' : ''}, ${peopleCount} personne${peopleCount > 1 ? 's' : ''} au total.`;
+    feedback.textContent = `Envoi de votre inscription : ${slotCount} créneau${slotCount > 1 ? 'x' : ''}, ${peopleCount} personne${peopleCount > 1 ? 's' : ''} au total.`;
     feedback.classList.add('is-success');
+    feedback.classList.remove('is-error');
+
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Inscription en cours...';
+    }
 });
 
 updateAllSlots();
+
+if (window.location.hash === '#registration-result') {
+    document.getElementById('registration-result')?.scrollIntoView({ block: 'start' });
+}

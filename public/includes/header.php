@@ -30,7 +30,11 @@ $navLinks = $navLinks ?? [
     <title><?= e($pageTitle); ?></title>
     <link rel="stylesheet" href="assets/css/style.css?v=<?= e((string) $cssVersion); ?>">
     <?php foreach ($extraScripts as $script): ?>
-        <script src="<?= e($script); ?>" defer></script>
+        <?php
+            $scriptPath = __DIR__ . '/../' . $script;
+            $scriptVersion = file_exists($scriptPath) ? filemtime($scriptPath) : time();
+        ?>
+        <script src="<?= e($script); ?>?v=<?= e((string) $scriptVersion); ?>" defer></script>
     <?php endforeach; ?>
 </head>
 <body class="<?= e($bodyClass); ?>">

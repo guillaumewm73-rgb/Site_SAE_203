@@ -234,7 +234,7 @@ require __DIR__ . '/includes/header.php';
             </p>
         </section>
 
-        <section class="registration-section" aria-label="Formulaire d'inscription">
+        <section class="registration-section" id="registration-result" aria-label="Formulaire d'inscription">
             <?php if ($registrationError): ?>
                 <div class="registration-feedback is-error" role="alert">
                     <?= e($registrationError); ?>
@@ -262,7 +262,7 @@ require __DIR__ . '/includes/header.php';
                 </div>
             <?php endif; ?>
 
-            <form class="registration-card" method="post" action="inscription.php" data-registration-form>
+            <form class="registration-card" method="post" action="inscription.php#registration-result" data-registration-form>
                 <div class="registration-card-header">
                     <div>
                         <h2>Composer votre visite</h2>
@@ -418,7 +418,9 @@ require __DIR__ . '/includes/header.php';
                     <p data-form-feedback>
                         Les places restantes se recalculent selon le jour, l’heure et la salle.
                     </p>
-                    <button class="button button-primary" type="submit">Confirmer l’inscription</button>
+                    <button class="button button-primary" type="submit" data-submit-registration>
+                        Confirmer l’inscription
+                    </button>
                 </div>
             </form>
         </section>
