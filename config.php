@@ -1,21 +1,7 @@
 <?php
-    /* ========================================================
-       DATABASE
-       ======================================================== */
     define('NOM_BD', 'sae203_bdd');
     define('SERVEUR_BD', 'localhost');
+    define('PORT_BD', 3306);
     define('LOGIN_BD', 'root');
     define('PASSE_BD', '');
-
-    /* ========================================================
-       EMAIL CONFIGURATION - Gmail SMTP
-       ======================================================== */
-    define('MAIL_SMTP_HOST', 'smtp.gmail.com');
-    define('MAIL_SMTP_PORT', 587);
-    define('MAIL_SMTP_USER', 'guillaumewm73@gmail.com');
-    define('MAIL_SMTP_PASSWORD', 'your_app_password_here'); // Voir README pour générer le mot de passe
-    define('MAIL_FROM_ADDRESS', 'guillaumewm73@gmail.com');
-    define('MAIL_FROM_NAME', 'e-llusion - Exposition');
-    define('MAIL_ENABLED', true); // Set to false to disable email sending
-
 ?>
