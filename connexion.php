@@ -2,7 +2,8 @@
 require_once __DIR__ . '/config.php';
 
 try {
-    $dsn = 'mysql:host=' . SERVEUR_BD . ';dbname=' . NOM_BD . ';charset=utf8mb4';
+    $port = defined('PORT_BD') && PORT_BD !== '' ? ';port=' . PORT_BD : '';
+    $dsn = 'mysql:host=' . SERVEUR_BD . $port . ';dbname=' . NOM_BD . ';charset=utf8mb4';
 
     $conn = new PDO(
         $dsn,
