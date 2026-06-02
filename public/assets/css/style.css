@@ -79,7 +79,8 @@ a {
     gap: 14px;
     color: var(--white);
     font-weight: 800;
-    font-size: 21px;
+    font-size: 40px;
+    font-family: "CutePixel", Helvetica Neue, Helvetica, Arial, sans-serif;
 }
 
 .brand-line {

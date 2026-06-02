@@ -37,7 +37,7 @@ $navLinks = $navLinks ?? [
     <header class="site-header">
         <a class="brand" href="index.php" aria-label="Retour à l'accueil">
             <span class="brand-line"></span>
-            <span>e-llusion</span>
+            <span>E-llusion</span>
         </a>
 
         <nav class="main-nav" aria-label="Navigation principale">
