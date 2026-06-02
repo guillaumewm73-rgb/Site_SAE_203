@@ -62,7 +62,7 @@ require __DIR__ . '/includes/header.php';
 
                 <div class="hero-content">
                     <p class="eyebrow">Exposition interactive MMI</p>
-                    <h1 id="hero-title">e-llusion</h1>
+                    <h1 id="hero-title">E-llusion</h1>
                     <p>
                         Un parcours d’œuvres multimédia interactives où les perceptions
                         se déforment, se déclenchent et se partagent.
