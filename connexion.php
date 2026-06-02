@@ -1,5 +1,11 @@
 <?php
-require_once __DIR__ . '/config.php';
+
+define('NOM_BD', 'ijtebowcompte13');
+define('SERVEUR_BD', 'ijtebowcompte13.mysql.db');
+define('PORT_BD', '');
+define('LOGIN_BD', 'ijtebowcompte13');
+define('PASSE_BD', 'v8ng67SF2026');
+
 
 try {
     $port = defined('PORT_BD') && PORT_BD !== '' ? ';port=' . PORT_BD : '';
