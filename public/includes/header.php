@@ -12,6 +12,7 @@ $activePage = $activePage ?? '';
 $bodyClass = $bodyClass ?? '';
 $reserveHref = $reserveHref ?? 'inscription.php';
 $extraScripts = $extraScripts ?? [];
+$cssVersion = filemtime(__DIR__ . '/../assets/css/style.css');
 $navLinks = $navLinks ?? [
     ['key' => 'accueil', 'label' => 'Accueil', 'href' => 'index.php'],
     ['key' => 'salles', 'label' => 'Salles', 'href' => 'index.php#salles'],
@@ -27,7 +28,7 @@ $navLinks = $navLinks ?? [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($pageTitle); ?></title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=<?= e((string) $cssVersion); ?>">
     <?php foreach ($extraScripts as $script): ?>
         <script src="<?= e($script); ?>" defer></script>
     <?php endforeach; ?>
