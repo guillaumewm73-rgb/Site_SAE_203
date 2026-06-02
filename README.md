@@ -13,6 +13,13 @@ Projet PHP simple pour le site de réservation de l'exposition e-llusion.
 /Applications/MAMP/Library/bin/mysql80/bin/mysql -h 127.0.0.1 -P 8889 -u root -proot sae203_bdd < database/sae203_bdd_v1.sql
 ```
 
+Pour réinitialiser complètement la base avant un nouvel import :
+
+```bash
+/Applications/MAMP/Library/bin/mysql80/bin/mysql -h 127.0.0.1 -P 8889 -u root -proot -e "DROP DATABASE IF EXISTS sae203_bdd; CREATE DATABASE sae203_bdd CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;"
+/Applications/MAMP/Library/bin/mysql80/bin/mysql -h 127.0.0.1 -P 8889 -u root -proot sae203_bdd < database/sae203_bdd_v1.sql
+```
+
 3. Depuis ce dossier, lancer le serveur PHP :
 
 ```bash

@@ -134,6 +134,10 @@ require __DIR__ . '/includes/header.php';
                                         <strong><?= e(formatReservationTime((string) $reservationResult['heure_debut'])); ?></strong>
                                     </div>
                                     <div class="auth-result-item">
+                                        <span>Personnes</span>
+                                        <strong><?= e((string) $reservationResult['nombre_personnes']); ?></strong>
+                                    </div>
+                                    <div class="auth-result-item">
                                         <span>Buffet</span>
                                         <strong><?= !empty($reservationResult['participe_buffet']) ? 'Oui' : 'Non'; ?></strong>
                                     </div>
