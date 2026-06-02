@@ -1,10 +1,2 @@
 {
-  "emeraldwalk.runonsave": {
-    "commands": [
-      {
-        "match": ".*",
-        "cmd": "git add -A"
-      }
-    ]
-  }
 }
