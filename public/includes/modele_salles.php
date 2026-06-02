@@ -77,7 +77,6 @@ $nextRoom = $currentRoomIndex !== false && $currentRoomIndex < count($roomNumber
             <section class="room-panel room-panel-dark" id="oeuvres" data-room-section>
                 <div class="section-heading section-heading-dark">
                     <h2>Les œuvres</h2>
-                    <p>Le texte ci-dessous reprend les descriptions du support ODS, organisées par sous-groupe.</p>
                 </div>
 
                 <div class="room-works-grid">
