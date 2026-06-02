@@ -1,6 +1,6 @@
     <footer class="site-footer" id="contact">
         <div class="footer-info">
-            <h2>e-llusion</h2>
+            <h2>E-llusion</h2>
             <p>Exposition d’œuvres multimédia interactives des étudiant·es MMI.</p>
             <p>28 Av du Lac d’Annecy, 73370 Le Bourget-du-Lac</p>
         </div>
