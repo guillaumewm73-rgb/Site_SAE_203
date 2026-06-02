@@ -201,6 +201,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'reservations' => $createdReservations,
         ];
 
+        // Envoi de l'email de confirmation
+        $emailSent = sendConfirmationEmail(
+            $prenom,
+            $nom,
+            $contact,
+            $createdReservations,
+            $roomCatalog
+        );
+
+        if ($emailSent) {
+            $registrationSuccess['email_sent'] = true;
+        }
+
         $availabilityRows = getAdminAvailability($conn);
         $availability = [];
         foreach ($availabilityRows as $row) {
@@ -249,6 +262,11 @@ require __DIR__ . '/includes/header.php';
                         votre demande est bien enregistrée avec le contact
                         <?= e((string) $registrationSuccess['contact']); ?>.
                     </p>
+                    <?php if (isset($registrationSuccess['email_sent']) && $registrationSuccess['email_sent']): ?>
+                        <p style="margin-top: 10px; font-style: italic; color: #27ae60;">
+                            ✓ Un email de confirmation a été envoyé à <?= e((string) $registrationSuccess['contact']); ?>.
+                        </p>
+                    <?php endif; ?>
                     <ul>
                         <?php foreach ($registrationSuccess['reservations'] as $reservation): ?>
                             <li>
