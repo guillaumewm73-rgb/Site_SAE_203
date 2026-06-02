@@ -2054,6 +2054,22 @@ a {
     line-height: 1.35;
 }
 
+.admin-feedback {
+    max-width: 1180px;
+    margin: 28px auto 0;
+    padding: 16px 20px;
+    border: 1px solid var(--cyan);
+    border-radius: 6px;
+    background: var(--black);
+    color: var(--cyan);
+    font-weight: 800;
+}
+
+.admin-feedback.is-error {
+    border-color: var(--red);
+    color: var(--red);
+}
+
 .admin-edit-form {
     display: grid;
     gap: 14px;
@@ -2122,6 +2138,12 @@ a {
     margin-bottom: 18px;
 }
 
+.admin-search-field .button {
+    width: fit-content;
+    min-height: 38px;
+    padding: 0 18px;
+}
+
 .admin-reservation-list {
     display: grid;
     gap: 8px;
@@ -2180,6 +2202,10 @@ a {
     gap: 8px;
 }
 
+.admin-row-actions form {
+    margin: 0;
+}
+
 .admin-row-actions button {
     min-height: 30px;
     padding: 0 12px;
@@ -2197,6 +2223,13 @@ a {
 .admin-row-actions button:last-child {
     border: 1px solid var(--red);
     color: var(--red);
+}
+
+.admin-empty-state {
+    padding: 18px;
+    border: 1px solid rgba(60, 232, 215, 0.24);
+    border-radius: 6px;
+    background: #020606;
 }
 
 .admin-availability-panel {
@@ -2221,7 +2254,10 @@ a {
     margin: 0 0 28px;
 }
 
-.admin-day-tabs button {
+.admin-day-tabs a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     min-height: 42px;
     min-width: 150px;
     padding: 0 18px;
@@ -2231,6 +2267,7 @@ a {
     color: var(--white);
     font-size: 14px;
     font-weight: 800;
+    text-decoration: none;
 }
 
 .admin-day-tabs .is-active {
