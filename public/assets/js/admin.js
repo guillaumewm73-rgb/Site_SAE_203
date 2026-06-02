@@ -26,6 +26,7 @@ function fillEditForm(row) {
     editForm.categorie_id.value = row.dataset.categorieId || '';
     editForm.salle_creneaux_id.value = row.dataset.slotId || '';
     editForm.participe_buffet.value = row.dataset.buffet || '0';
+    editForm.nombre_personnes.value = row.dataset.people || '1';
 
     rows.forEach((item) => item.classList.remove('is-selected'));
     row.classList.add('is-selected');

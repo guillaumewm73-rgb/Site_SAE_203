@@ -681,6 +681,44 @@ a {
     padding: 58px 88px 72px;
 }
 
+.registration-feedback {
+    max-width: 1120px;
+    margin: 0 auto 24px;
+    padding: 22px 26px;
+    border: 1px solid var(--cyan);
+    border-radius: 8px;
+    background: var(--black);
+    color: var(--muted);
+    box-shadow: var(--shadow);
+}
+
+.registration-feedback h2 {
+    margin: 0 0 10px;
+    color: var(--white);
+    font-size: 28px;
+}
+
+.registration-feedback p,
+.registration-feedback ul {
+    margin: 0;
+}
+
+.registration-feedback ul {
+    display: grid;
+    gap: 8px;
+    margin-top: 14px;
+    padding-left: 20px;
+}
+
+.registration-feedback.is-success {
+    border-color: var(--cyan);
+}
+
+.registration-feedback.is-error {
+    border-color: var(--red);
+    color: var(--white);
+}
+
 .registration-card {
     max-width: 1120px;
     margin: 0 auto;

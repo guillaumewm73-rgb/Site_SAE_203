@@ -2,41 +2,85 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../fonctions.php';
 require __DIR__ . '/includes/donnee_salles.php';
 
+function registrationFormatDate(string $date, string $dayName): string
+{
+    $months = [
+        '01' => 'janvier',
+        '02' => 'février',
+        '03' => 'mars',
+        '04' => 'avril',
+        '05' => 'mai',
+        '06' => 'juin',
+        '07' => 'juillet',
+        '08' => 'août',
+        '09' => 'septembre',
+        '10' => 'octobre',
+        '11' => 'novembre',
+        '12' => 'décembre',
+    ];
+
+    $parsedDate = DateTimeImmutable::createFromFormat('Y-m-d', $date);
+
+    if (!$parsedDate) {
+        return trim($dayName . ' ' . $date);
+    }
+
+    return trim($dayName . ' ' . $parsedDate->format('d') . ' ' . ($months[$parsedDate->format('m')] ?? $parsedDate->format('m')));
+}
+
+function registrationFormatTime(string $time): string
+{
+    $parsedTime = DateTimeImmutable::createFromFormat('H:i:s', $time);
+
+    return $parsedTime ? $parsedTime->format('H:i') : substr($time, 0, 5);
+}
+
+function registrationDayKey(string $dayName): string
+{
+    return strtolower(trim($dayName));
+}
+
 $roomCatalog = getRoomCatalog();
+$categories = getAdminCategories($conn);
+$slotsFromDatabase = getAdminSlots($conn);
+$availabilityRows = getAdminAvailability($conn);
 
-$visitDays = [
-    'jeudi' => [
-        'label' => 'Jeudi 18 juin',
-        'date' => '18 juin 2026',
-        'times' => ['15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '19:00', '19:30', '20:00'],
-    ],
-    'vendredi' => [
-        'label' => 'Vendredi 19 juin',
-        'date' => '19 juin 2026',
-        'times' => ['09:30', '10:00', '10:30', '11:00'],
-    ],
-];
-
+$visitDays = [];
 $rooms = [];
 
-foreach ($roomCatalog as $roomNumber => $room) {
+foreach ($slotsFromDatabase as $slot) {
+    $dayKey = registrationDayKey((string) $slot['nom_jour']);
+    $time = registrationFormatTime((string) $slot['heure_debut']);
+    $roomNumber = (string) $slot['numero_salle'];
+
+    $visitDays[$dayKey] ??= [
+        'label' => registrationFormatDate((string) $slot['date_jour'], (string) $slot['nom_jour']),
+        'date' => registrationFormatDate((string) $slot['date_jour'], ''),
+        'times' => [],
+    ];
+
+    if (!in_array($time, $visitDays[$dayKey]['times'], true)) {
+        $visitDays[$dayKey]['times'][] = $time;
+    }
+
+    $room = $roomCatalog[$roomNumber] ?? null;
     $rooms[$roomNumber] = [
-        'tp' => $room['supportLabel'],
-        'title' => $room['title'],
+        'tp' => $room['supportLabel'] ?? '',
+        'title' => $room['title'] ?? (string) $slot['nom_salle'],
     ];
 }
 
 $availability = [];
 
-foreach (array_keys($visitDays) as $dayIndex => $dayKey) {
-    foreach ($visitDays[$dayKey]['times'] as $timeIndex => $time) {
-        foreach (array_keys($rooms) as $roomIndex => $roomNumber) {
-            $usedPlaces = ($dayIndex * 3 + $timeIndex * 2 + $roomIndex) % 8;
-            $availability[$dayKey . '|' . $time . '|' . $roomNumber] = 12 - $usedPlaces;
-        }
-    }
+foreach ($availabilityRows as $row) {
+    $dayKey = registrationDayKey((string) $row['nom_jour']);
+    $time = registrationFormatTime((string) $row['heure_debut']);
+    $roomNumber = (string) $row['numero_salle'];
+
+    $availability[$dayKey . '|' . $time . '|' . $roomNumber] = (int) $row['remaining_places'];
 }
 
 $registrationData = [
@@ -44,6 +88,133 @@ $registrationData = [
     'rooms' => $rooms,
     'availability' => $availability,
 ];
+
+$registrationError = null;
+$registrationSuccess = null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        $prenom = trim((string) ($_POST['firstname'] ?? ''));
+        $nom = trim((string) ($_POST['lastname'] ?? ''));
+        $contact = trim((string) ($_POST['contact_value'] ?? ''));
+        $categorieId = filter_input(INPUT_POST, 'visitor_type', FILTER_VALIDATE_INT);
+        $participeBuffet = filter_input(INPUT_POST, 'participates_buffet', FILTER_VALIDATE_INT);
+        $postedSlots = $_POST['slots'] ?? [];
+
+        if ($prenom === '' || $nom === '' || $contact === '') {
+            throw new RuntimeException('Renseignez votre prénom, votre nom et un email ou téléphone.');
+        }
+
+        if (!$categorieId) {
+            throw new RuntimeException('Sélectionnez votre catégorie de visiteur.');
+        }
+
+        if (!is_array($postedSlots) || count($postedSlots) === 0) {
+            throw new RuntimeException('Ajoutez au moins un créneau de visite.');
+        }
+
+        $requestedSlots = [];
+
+        foreach ($postedSlots as $slot) {
+            if (!is_array($slot)) {
+                continue;
+            }
+
+            $day = trim((string) ($slot['day'] ?? ''));
+            $time = trim((string) ($slot['time'] ?? ''));
+            $room = trim((string) ($slot['room'] ?? ''));
+            $people = filter_var($slot['people'] ?? null, FILTER_VALIDATE_INT);
+
+            if ($day === '' || $time === '' || $room === '' || !$people) {
+                throw new RuntimeException('Un des créneaux est incomplet.');
+            }
+
+            if ($people < 1 || $people > 12) {
+                throw new RuntimeException('Le nombre de personnes doit être compris entre 1 et 12.');
+            }
+
+            $salleCreneauxId = getSalleCreneauxIdBySelection($conn, $day, $time, $room);
+
+            if (!$salleCreneauxId) {
+                throw new RuntimeException('Un créneau sélectionné n’existe pas dans la base de données.');
+            }
+
+            $requestedSlots[$salleCreneauxId] ??= [
+                'salle_creneaux_id' => $salleCreneauxId,
+                'day' => $day,
+                'time' => $time,
+                'room' => $room,
+                'people' => 0,
+            ];
+            $requestedSlots[$salleCreneauxId]['people'] += $people;
+        }
+
+        foreach ($requestedSlots as $slot) {
+            $remainingPlaces = getPlacesRestantes($conn, (int) $slot['salle_creneaux_id']);
+
+            if ($slot['people'] > $remainingPlaces) {
+                throw new RuntimeException(
+                    'Il ne reste que ' . $remainingPlaces . ' place(s) pour la salle '
+                    . $slot['room'] . ' à ' . $slot['time'] . '.'
+                );
+            }
+        }
+
+        $conn->beginTransaction();
+
+        try {
+            $visiteurId = (int) createVisiteur(
+                $conn,
+                $nom,
+                $prenom,
+                $contact,
+                $categorieId,
+                $participeBuffet ?? 0
+            );
+
+            $createdReservations = [];
+            foreach ($requestedSlots as $slot) {
+                $reservationId = createReservation(
+                    $conn,
+                    $visiteurId,
+                    (int) $slot['salle_creneaux_id'],
+                    (int) $slot['people']
+                );
+
+                $createdReservations[] = [
+                    'id' => $reservationId,
+                    'room' => $slot['room'],
+                    'time' => $slot['time'],
+                    'people' => $slot['people'],
+                ];
+            }
+
+            $conn->commit();
+        } catch (Throwable $exception) {
+            $conn->rollBack();
+            throw $exception;
+        }
+
+        $registrationSuccess = [
+            'visitor' => trim($prenom . ' ' . $nom),
+            'contact' => $contact,
+            'reservations' => $createdReservations,
+        ];
+
+        $availabilityRows = getAdminAvailability($conn);
+        $availability = [];
+        foreach ($availabilityRows as $row) {
+            $dayKey = registrationDayKey((string) $row['nom_jour']);
+            $time = registrationFormatTime((string) $row['heure_debut']);
+            $roomNumber = (string) $row['numero_salle'];
+
+            $availability[$dayKey . '|' . $time . '|' . $roomNumber] = (int) $row['remaining_places'];
+        }
+        $registrationData['availability'] = $availability;
+    } catch (Throwable $exception) {
+        $registrationError = $exception->getMessage();
+    }
+}
 
 $pageTitle = 'Inscription - e-llusion';
 $activePage = 'inscription';
@@ -64,7 +235,34 @@ require __DIR__ . '/includes/header.php';
         </section>
 
         <section class="registration-section" aria-label="Formulaire d'inscription">
-            <form class="registration-card" data-registration-form>
+            <?php if ($registrationError): ?>
+                <div class="registration-feedback is-error" role="alert">
+                    <?= e($registrationError); ?>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($registrationSuccess): ?>
+                <div class="registration-feedback is-success" role="status">
+                    <h2>Réservation enregistrée</h2>
+                    <p>
+                        <?= e((string) $registrationSuccess['visitor']); ?>,
+                        votre demande est bien enregistrée avec le contact
+                        <?= e((string) $registrationSuccess['contact']); ?>.
+                    </p>
+                    <ul>
+                        <?php foreach ($registrationSuccess['reservations'] as $reservation): ?>
+                            <li>
+                                Réservation #<?= e((string) $reservation['id']); ?> :
+                                salle <?= e((string) $reservation['room']); ?>,
+                                <?= e((string) $reservation['time']); ?>,
+                                <?= e((string) $reservation['people']); ?> personne<?= (int) $reservation['people'] > 1 ? 's' : ''; ?>.
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <form class="registration-card" method="post" action="inscription.php" data-registration-form>
                 <div class="registration-card-header">
                     <div>
                         <h2>Composer votre visite</h2>
@@ -161,10 +359,11 @@ require __DIR__ . '/includes/header.php';
                         <label>
                             <span>Qui êtes-vous ?</span>
                             <select name="visitor_type" required>
-                                <option value="enseignant">Enseignant</option>
-                                <option value="personnel_usmb">Personnel de l’USMB</option>
-                                <option value="visiteur_exterieur">Visiteur extérieur</option>
-                                <option value="professionnel_partenaire">Professionnel / partenaire</option>
+                                <?php foreach ($categories as $category): ?>
+                                    <option value="<?= e((string) $category['id']); ?>">
+                                        <?= e((string) $category['libelle']); ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </label>
 

@@ -91,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $categorieId = filter_input(INPUT_POST, 'categorie_id', FILTER_VALIDATE_INT);
             $salleCreneauxId = filter_input(INPUT_POST, 'salle_creneaux_id', FILTER_VALIDATE_INT);
             $participeBuffet = filter_input(INPUT_POST, 'participe_buffet', FILTER_VALIDATE_INT);
+            $nombrePersonnes = filter_input(INPUT_POST, 'nombre_personnes', FILTER_VALIDATE_INT);
             $nom = trim((string) ($_POST['nom'] ?? ''));
             $prenom = trim((string) ($_POST['prenom'] ?? ''));
             $moyenComm = trim((string) ($_POST['moyen_comm'] ?? ''));
@@ -103,6 +104,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('Le nom et le moyen de contact sont obligatoires.');
             }
 
+            if (!$nombrePersonnes || $nombrePersonnes < 1 || $nombrePersonnes > 12) {
+                throw new RuntimeException('Le nombre de personnes doit être compris entre 1 et 12.');
+            }
+
             updateAdminReservation(
                 $conn,
                 $reservationId,
@@ -112,7 +117,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $moyenComm,
                 $categorieId,
                 $salleCreneauxId,
-                $participeBuffet ?? 0
+                $participeBuffet ?? 0,
+                $nombrePersonnes
             );
 
             redirectAdmin('updated', $search, $selectedDay);
@@ -320,7 +326,14 @@ require __DIR__ . '/includes/header.php';
 
                     <label>
                         <span>Nombre de places</span>
-                        <input type="text" value="1 place par réservation" disabled>
+                        <input
+                            type="number"
+                            name="nombre_personnes"
+                            min="1"
+                            max="12"
+                            required
+                            value="<?= e((string) ($selectedReservation['nombre_personnes'] ?? 1)); ?>"
+                        >
                     </label>
 
                     <div class="admin-edit-actions">
@@ -413,6 +426,7 @@ require __DIR__ . '/includes/header.php';
                                 data-categorie-id="<?= e((string) $reservation['categories_visiteur_id']); ?>"
                                 data-slot-id="<?= e((string) $reservation['salle_creneaux_id']); ?>"
                                 data-buffet="<?= e((string) $buffetValue); ?>"
+                                data-people="<?= e((string) $reservation['nombre_personnes']); ?>"
                                 data-search-text="<?= e(strtolower(implode(' ', [
                                     $reservation['nom'],
                                     $reservation['prenom'],
@@ -429,7 +443,7 @@ require __DIR__ . '/includes/header.php';
                                 <span><?= e(adminFormatShortDay((string) $reservation['date_jour'], (string) $reservation['nom_jour'])); ?></span>
                                 <span><?= e(adminFormatTime((string) $reservation['heure_debut'])); ?></span>
                                 <span><?= e((string) $reservation['numero_salle']); ?></span>
-                                <span class="admin-places-count">1</span>
+                                <span class="admin-places-count"><?= e((string) $reservation['nombre_personnes']); ?></span>
                                 <span class="admin-row-actions">
                                     <button type="button" data-admin-edit>Modifier</button>
                                     <form method="post" action="admin.php" data-admin-delete-form>

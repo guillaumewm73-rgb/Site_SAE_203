@@ -96,9 +96,8 @@ addSlotButton.addEventListener('click', () => {
 });
 
 form.addEventListener('submit', (event) => {
-    event.preventDefault();
-
     if (!form.reportValidity()) {
+        event.preventDefault();
         return;
     }
 
@@ -106,6 +105,7 @@ form.addEventListener('submit', (event) => {
         .some((capacity) => capacity.classList.contains('is-full'));
 
     if (hasOverbookedSlot) {
+        event.preventDefault();
         feedback.textContent = 'Réduisez le nombre de personnes : au moins un créneau dépasse les places disponibles.';
         feedback.classList.remove('is-success');
         return;

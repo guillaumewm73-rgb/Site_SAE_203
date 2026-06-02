@@ -122,7 +122,8 @@ INSERT INTO `jour` (`id`, `date_jour`, `nom_jour`) VALUES
 CREATE TABLE `reservation` (
   `id` int(11) NOT NULL,
   `visiteurs_id` int(11) NOT NULL,
-  `salle_creneaux_id` int(11) NOT NULL
+  `salle_creneaux_id` int(11) NOT NULL,
+  `nombre_personnes` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

@@ -83,7 +83,7 @@ function getPlacesRestantes(PDO $conn, int $salleCreneauxId): int
         return 0;
     }
 
-    $req2 = $conn->prepare('SELECT COUNT(*) AS nb FROM reservation WHERE salle_creneaux_id = :id');
+    $req2 = $conn->prepare('SELECT COALESCE(SUM(nombre_personnes), 0) AS nb FROM reservation WHERE salle_creneaux_id = :id');
     $req2->execute([':id' => $salleCreneauxId]);
     $nbReservations = (int) $req2->fetch()['nb'];
 
@@ -100,7 +100,7 @@ function getAdminAvailability(PDO $conn): array
             c.heure_debut,
             j.nom_jour,
             j.date_jour,
-            COUNT(r.id) AS reserved_count
+            COALESCE(SUM(r.nombre_personnes), 0) AS reserved_count
         FROM salle_creneaux sc
         JOIN salles s ON sc.salles_id = s.id
         JOIN creneaux c ON sc.creneaux_id = c.id
@@ -156,18 +156,44 @@ function createVisiteur(
     return $conn->lastInsertId();
 }
 
-function createReservation(PDO $conn, int $visiteursId, int $salleCreneauxId): string
+function createReservation(PDO $conn, int $visiteursId, int $salleCreneauxId, int $nombrePersonnes = 1): string
 {
     $req = $conn->prepare("
-        INSERT INTO reservation (visiteurs_id, salle_creneaux_id)
-        VALUES (:visiteurs_id, :salle_creneaux_id)
+        INSERT INTO reservation (visiteurs_id, salle_creneaux_id, nombre_personnes)
+        VALUES (:visiteurs_id, :salle_creneaux_id, :nombre_personnes)
     ");
     $req->execute([
         ':visiteurs_id' => $visiteursId,
         ':salle_creneaux_id' => $salleCreneauxId,
+        ':nombre_personnes' => $nombrePersonnes,
     ]);
 
     return $conn->lastInsertId();
+}
+
+function getSalleCreneauxIdBySelection(PDO $conn, string $dayKey, string $time, string $roomNumber): ?int
+{
+    $timeWithSeconds = strlen($time) === 5 ? $time . ':00' : $time;
+
+    $req = $conn->prepare("
+        SELECT sc.id
+        FROM salle_creneaux sc
+        JOIN salles s ON sc.salles_id = s.id
+        JOIN creneaux c ON sc.creneaux_id = c.id
+        JOIN jour j ON c.jour_id = j.id
+        WHERE LOWER(j.nom_jour) = :day_key
+          AND c.heure_debut = :heure_debut
+          AND s.numero_salle = :numero_salle
+        LIMIT 1
+    ");
+    $req->execute([
+        ':day_key' => strtolower($dayKey),
+        ':heure_debut' => $timeWithSeconds,
+        ':numero_salle' => $roomNumber,
+    ]);
+    $slot = $req->fetch();
+
+    return $slot ? (int) $slot['id'] : null;
 }
 
 function getReservationById(PDO $conn, int $reservationId): ?array
@@ -177,6 +203,7 @@ function getReservationById(PDO $conn, int $reservationId): ?array
             r.id AS reservation_id,
             r.visiteurs_id,
             r.salle_creneaux_id,
+            r.nombre_personnes,
             v.nom,
             v.prenom,
             v.moyen_comm,
@@ -196,6 +223,7 @@ function getReservationDetailsById(PDO $conn, int $reservationId): ?array
     $req = $conn->prepare("
         SELECT
             r.id AS reservation_id,
+            r.nombre_personnes,
             v.nom,
             v.prenom,
             v.moyen_comm,
@@ -257,6 +285,7 @@ function getAdminReservations(PDO $conn, string $query = ''): array
             r.id AS reservation_id,
             r.visiteurs_id,
             r.salle_creneaux_id,
+            r.nombre_personnes,
             v.nom,
             v.prenom,
             v.moyen_comm,
@@ -314,7 +343,8 @@ function updateAdminReservation(
     string $moyenComm,
     int $categorieId,
     int $salleCreneauxId,
-    int $participeBuffet
+    int $participeBuffet,
+    int $nombrePersonnes = 1
 ): void {
     $conn->beginTransaction();
 
@@ -340,11 +370,14 @@ function updateAdminReservation(
 
         $reqReservation = $conn->prepare("
             UPDATE reservation
-            SET salle_creneaux_id = :salle_creneaux_id
+            SET
+                salle_creneaux_id = :salle_creneaux_id,
+                nombre_personnes = :nombre_personnes
             WHERE id = :reservation_id AND visiteurs_id = :visiteur_id
         ");
         $reqReservation->execute([
             ':salle_creneaux_id' => $salleCreneauxId,
+            ':nombre_personnes' => $nombrePersonnes,
             ':reservation_id' => $reservationId,
             ':visiteur_id' => $visiteurId,
         ]);
