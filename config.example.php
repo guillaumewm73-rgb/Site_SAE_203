@@ -3,9 +3,10 @@
        DATABASE
        ======================================================== */
     define('NOM_BD', 'sae203_bdd');
-    define('SERVEUR_BD', 'localhost');
+    define('SERVEUR_BD', '127.0.0.1');
+    define('PORT_BD', 8889);
     define('LOGIN_BD', 'root');
-    define('PASSE_BD', '');
+    define('PASSE_BD', 'root');
 
     /* ========================================================
        EMAIL CONFIGURATION - Gmail SMTP
