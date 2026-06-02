@@ -4,7 +4,7 @@
    À inclure dans chaque page qui a besoin de la BDD.
    -------------------------------------------------------- */
 
-require_once __DIR__ . '/connexion.php';
+require_once __DIR__ . '/page_connexion.php';
 
 /* ========================================================
    SALLES
