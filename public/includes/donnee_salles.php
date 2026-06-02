@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 function getRoomCatalog(): array
 {
-    return [
+    $sourceCatalog = [
         '001' => [
             'number' => '001',
             'title' => 'Miroirs numériques',
@@ -156,6 +156,40 @@ TEXT,
             ],
         ],
     ];
+
+    $roomOrder = [
+        '001' => '021',
+        '002' => '005',
+        '005' => '001',
+        '021' => '002',
+    ];
+
+    $roomGroups = [
+        '001' => 'La PÃ©piniÃ¨re',
+        '002' => "L'Envers du DÃ©cor",
+        '005' => 'Horizon',
+        '021' => 'Societ-e',
+    ];
+
+    $roomSupportLabels = [
+        '001' => 'IdentitÃ©s numÃ©riques â€” TP 2.2 - Lotus / E-biscus / Datura / Å“uvre 4',
+        '002' => 'PrÃ©sences augmentÃ©es â€” TP 2.1 - Tapis Rouge / En Direct / AD-HD',
+        '005' => 'Miroirs numÃ©riques â€” TP 1.1 - Community / Distorsion',
+        '021' => 'SociÃ©tÃ© parfaite ? â€” TP 1.2 - Bon profil / AntithÃ¨se / BeautÃ© hors du cadre',
+    ];
+
+    $catalog = [];
+
+    foreach ($roomOrder as $number => $sourceNumber) {
+        $room = $sourceCatalog[$sourceNumber];
+        $room['number'] = $number;
+        $room['slug'] = 'salle-' . $number . '.php';
+        $room['title'] = $roomGroups[$number];
+        $room['supportLabel'] = $roomSupportLabels[$number];
+        $catalog[$number] = $room;
+    }
+
+    return $catalog;
 }
 
 function getRoomNumbers(): array
