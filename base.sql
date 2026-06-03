@@ -18,10 +18,10 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de données : `ijtebowcompte13`
+-- Base de données : à adapter à chaque fois
 --
-CREATE DATABASE IF NOT EXISTS `ijtebowcompte13` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
-USE `ijtebowcompte13`;
+/*CREATE DATABASE IF NOT EXISTS `ijtebowcompte13` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `ijtebowcompte13`;*/
 
 -- --------------------------------------------------------
 
