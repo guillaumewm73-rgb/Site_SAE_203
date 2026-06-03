@@ -434,6 +434,21 @@ function cancelReservation(PDO $conn, int $reservationId): void
     deleteAdminReservation($conn, $reservationId);
 }
 
+function deleteVisitorReservation(PDO $conn, int $reservationId, int $visiteurId): bool
+{
+    $req = $conn->prepare("
+        DELETE FROM reservation
+        WHERE id = :reservation_id
+          AND visiteurs_id = :visiteur_id
+    ");
+    $req->execute([
+        ':reservation_id' => $reservationId,
+        ':visiteur_id' => $visiteurId,
+    ]);
+
+    return $req->rowCount() > 0;
+}
+
 /* ========================================================
    RÉSERVATIONS — ADMIN
    ======================================================== */

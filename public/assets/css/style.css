@@ -1274,6 +1274,12 @@ a {
     border-top: 1px solid rgba(60, 232, 215, 0.45);
 }
 
+.auth-reservation-actions + .auth-result-grid {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(60, 232, 215, 0.45);
+}
+
 .auth-result.is-error {
     background: #fff1f1;
     border-color: var(--red);
@@ -1298,6 +1304,31 @@ a {
 }
 
 .auth-result-heading .button {
+    min-height: 42px;
+    padding: 0 18px;
+}
+
+.auth-result-message {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-left: 4px solid var(--cyan);
+    background: rgba(60, 232, 215, 0.18);
+    color: var(--black);
+    font-weight: 800;
+}
+
+.auth-reservation-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.auth-reservation-actions form {
+    margin: 0;
+}
+
+.auth-reservation-actions .button {
     min-height: 42px;
     padding: 0 18px;
 }
@@ -2344,6 +2375,19 @@ a {
 .admin-legend {
     color: var(--cyan);
     font-weight: 800;
+}
+
+.admin-panel-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.admin-panel-actions .button {
+    min-height: 42px;
+    padding: 0 18px;
 }
 
 .admin-search-field {

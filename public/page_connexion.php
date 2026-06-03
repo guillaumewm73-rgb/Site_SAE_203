@@ -31,14 +31,31 @@ $lookupAttempted = false;
 $connectedVisitor = null;
 $reservationResults = [];
 $lookupError = null;
+$lookupMessage = null;
 $accessDenied = (string) ($_GET['access'] ?? '') === 'admin';
+$postedAction = (string) ($_POST['action'] ?? '');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' && !$accessDenied && isAdminConnected()) {
     header('Location: admin.php');
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' && !$accessDenied && isVisitorConnected()) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $postedAction === 'delete_reservation') {
+    $lookupAttempted = true;
+    $connectedVisitor = isVisitorConnected() ? ['id' => (int) $_SESSION['visiteur_id']] : null;
+    $reservationId = filter_input(INPUT_POST, 'reservation_id', FILTER_VALIDATE_INT);
+
+    if (!$connectedVisitor) {
+        $lookupError = 'Reconnectez-vous avant de supprimer une réservation.';
+    } elseif (!$reservationId) {
+        $lookupError = 'La réservation à supprimer est introuvable.';
+    } elseif (!deleteVisitorReservation($conn, $reservationId, (int) $_SESSION['visiteur_id'])) {
+        $lookupError = 'Cette réservation ne peut pas être supprimée.';
+    } else {
+        $lookupMessage = 'La réservation #' . $reservationId . ' a été supprimée.';
+        $reservationResults = getReservationDetailsByVisitorId($conn, (int) $_SESSION['visiteur_id']);
+    }
+} elseif ($_SERVER['REQUEST_METHOD'] !== 'POST' && !$accessDenied && isVisitorConnected()) {
     $connectedVisitor = ['id' => (int) $_SESSION['visiteur_id']];
     $reservationResults = getReservationDetailsByVisitorId($conn, (int) $_SESSION['visiteur_id']);
     $lookupAttempted = true;
@@ -143,6 +160,9 @@ require __DIR__ . '/includes/header.php';
                                     <h3>Réservation trouvée</h3>
                                     <a class="button button-secondary" href="deconnexion.php">Déconnexion</a>
                                 </div>
+                                <?php if ($lookupMessage): ?>
+                                    <p class="auth-result-message"><?= e($lookupMessage); ?></p>
+                                <?php endif; ?>
                                 <?php foreach ($reservationResults as $reservationResult): ?>
                                     <div class="auth-result-grid">
                                         <div class="auth-result-item">
@@ -182,7 +202,40 @@ require __DIR__ . '/includes/header.php';
                                             <strong><?= e((string) $reservationResult['description_salle']); ?></strong>
                                         </div>
                                     </div>
+                                    <div class="auth-reservation-actions">
+                                        <a
+                                            class="button button-secondary"
+                                            href="inscription.php?modifier=<?= e((string) $reservationResult['reservation_id']); ?>"
+                                        >
+                                            Modifier
+                                        </a>
+                                        <form method="post" action="page_connexion.php">
+                                            <input type="hidden" name="action" value="delete_reservation">
+                                            <input
+                                                type="hidden"
+                                                name="reservation_id"
+                                                value="<?= e((string) $reservationResult['reservation_id']); ?>"
+                                            >
+                                            <button
+                                                class="button button-danger"
+                                                type="submit"
+                                                onclick="return confirm('Supprimer cette réservation ?');"
+                                            >
+                                                Supprimer
+                                            </button>
+                                        </form>
+                                    </div>
                                 <?php endforeach; ?>
+                            </div>
+                        <?php elseif ($connectedVisitor && $lookupMessage): ?>
+                            <div class="auth-result">
+                                <div class="auth-result-heading">
+                                    <h3>Réservation supprimée</h3>
+                                    <a class="button button-secondary" href="deconnexion.php">Déconnexion</a>
+                                </div>
+                                <p class="auth-result-message"><?= e($lookupMessage); ?></p>
+                                <p>Vous n’avez plus de réservation active pour le moment.</p>
+                                <a class="button button-primary" href="inscription.php">Créer une nouvelle réservation</a>
                             </div>
                         <?php else: ?>
                             <div class="auth-result is-error">
