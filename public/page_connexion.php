@@ -23,7 +23,7 @@ function formatReservationTime(string $value): string
 $pageTitle = 'Connexion réservation - e-llusion';
 $activePage = 'connexion';
 $bodyClass = 'auth-page';
-$reserveHref = 'inscription.php';
+$reserveHref = 'reservation.php';
 
 $enteredContact = '';
 $enteredPassword = '';
@@ -112,12 +112,12 @@ require __DIR__ . '/includes/header.php';
             <p class="eyebrow">Espace visiteur</p>
             <h1 id="reservation-login-title">Connexion réservation</h1>
             <p>
-                Connectez-vous avec le mail ou le téléphone renseigné lors de l'inscription,
+                Connectez-vous avec le mail ou le téléphone renseigné lors de la réservation, et
                 puis utilisez le mot de passe choisi pour retrouver directement votre réservation.
             </p>
 
             <div class="hero-buttons">
-                <a class="button button-primary" href="inscription.php">Créer une réservation</a>
+                <a class="button button-primary" href="reservation.php">Créer une réservation</a>
                 <a class="button button-secondary" href="#verification">Vérifier ma réservation</a>
             </div>
         </section>
@@ -215,7 +215,7 @@ require __DIR__ . '/includes/header.php';
                                     <div class="auth-reservation-actions">
                                         <a
                                             class="button button-secondary"
-                                            href="inscription.php?modifier=<?= e((string) $reservationResult['reservation_id']); ?>#registration-result"
+                                            href="reservation.php?modifier=<?= e((string) $reservationResult['reservation_id']); ?>#registration-result"
                                         >
                                             Modifier
                                         </a>
@@ -245,7 +245,7 @@ require __DIR__ . '/includes/header.php';
                                 </div>
                                 <p class="auth-result-message"><?= e($lookupMessage); ?></p>
                                 <p>Vous n’avez plus de réservation active pour le moment.</p>
-                                <a class="button button-primary" href="inscription.php">Créer une nouvelle réservation</a>
+                                <a class="button button-primary" href="reservation.php">Créer une nouvelle réservation</a>
                             </div>
                         <?php else: ?>
                             <div class="auth-result is-error">
@@ -269,7 +269,7 @@ require __DIR__ . '/includes/header.php';
                         <h2>Besoin d'aide ?</h2>
                         <p>
                             Si la connexion ne fonctionne pas, vérifiez l'orthographe du
-                            mail ou du téléphone et le mot de passe choisi lors de l'inscription.
+                            mail ou du téléphone et le mot de passe choisi lors de la réservation.
                         </p>
                     </article>
                 </aside>

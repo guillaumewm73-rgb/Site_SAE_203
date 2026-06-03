@@ -9,7 +9,7 @@ requireAdminSession();
 $pageTitle = 'Administration - e-llusion';
 $activePage = 'admin';
 $bodyClass = 'admin-page';
-$reserveHref = 'inscription.php';
+$reserveHref = 'reservation.php';
 $extraScripts = ['assets/js/admin.js'];
 
 function adminFormatDate(string $date, ?string $dayName = null): string
@@ -65,7 +65,7 @@ function adminBoolValue(mixed $value): int
 
 function exportAdminReservationsCsv(array $reservations): never
 {
-    $filename = 'inscriptions-e-llusion-' . date('Y-m-d') . '.csv';
+    $filename = 'reservation-e-llusion-' . date('Y-m-d') . '.csv';
 
     header('Content-Type: text/csv; charset=UTF-8');
     header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -280,7 +280,7 @@ require __DIR__ . '/includes/header.php';
             <p class="eyebrow">Interface administratrice</p>
             <h1 id="admin-title">Administration</h1>
             <p>
-                Suivez les réservations, filtrez les inscriptions et visualisez les places
+                Suivez les réservations, filtrez les réservations et visualisez les places
                 disponibles par salle et par créneau.
             </p>
             <a class="button button-secondary admin-logout-button" href="deconnexion.php">Déconnexion</a>
@@ -426,7 +426,7 @@ require __DIR__ . '/includes/header.php';
                 <section class="admin-panel admin-reservations-panel" aria-labelledby="reservations-title">
                     <div class="admin-panel-header">
                         <div>
-                            <h2 id="reservations-title">Inscriptions</h2>
+                            <h2 id="reservations-title">Réservations</h2>
                             <p>Recherche, édition et suppression</p>
                         </div>
                         <div class="admin-panel-actions">
@@ -471,7 +471,7 @@ require __DIR__ . '/includes/header.php';
 
                         <?php if (!$reservations): ?>
                             <p class="admin-empty-state">
-                                Aucune réservation trouvée. Les inscriptions apparaîtront ici dès qu'elles seront enregistrées.
+                                Aucune réservation trouvée. Les réservations apparaîtront ici dès qu'elles seront enregistrées.
                             </p>
                         <?php endif; ?>
 

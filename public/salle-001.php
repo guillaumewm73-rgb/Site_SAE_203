@@ -10,7 +10,7 @@ if ($room === null) {
     $pageTitle = 'Salle introuvable - e-llusion';
     $activePage = 'salles';
     $bodyClass = 'room-page';
-    $reserveHref = 'inscription.php';
+    $reserveHref = 'reservation.php';
     $extraScripts = ['assets/js/rooms.js'];
 
     require_once __DIR__ . '/includes/header.php';
@@ -22,7 +22,7 @@ if ($room === null) {
 $pageTitle = 'Salle 001 - ' . $room['title'] . ' - e-llusion';
 $activePage = 'salles';
 $bodyClass = 'room-page';
-$reserveHref = 'inscription.php';
+$reserveHref = 'reservation.php';
 $extraScripts = ['assets/js/rooms.js'];
 
 require_once __DIR__ . '/includes/header.php';
