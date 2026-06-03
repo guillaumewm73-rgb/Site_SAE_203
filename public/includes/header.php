@@ -14,13 +14,13 @@ if (!function_exists('e')) {
 $pageTitle = $pageTitle ?? 'e-llusion - Exposition MMI';
 $activePage = $activePage ?? '';
 $bodyClass = $bodyClass ?? '';
-$reserveHref = $reserveHref ?? 'inscription.php';
+$reserveHref = $reserveHref ?? 'reservation.php';
 $extraScripts = $extraScripts ?? [];
 $cssVersion = filemtime(__DIR__ . '/../assets/css/style.css');
 $navLinks = $navLinks ?? [
     ['key' => 'accueil', 'label' => 'Accueil', 'href' => 'index.php'],
     ['key' => 'salles', 'label' => 'Salles', 'href' => 'index.php#salles'],
-    ['key' => 'inscription', 'label' => 'Inscription', 'href' => 'inscription.php'],
+    ['key' => 'reservation', 'label' => 'Réservation', 'href' => 'reservation.php'],
     ['key' => 'connexion', 'label' => 'Connexion', 'href' => 'page_connexion.php'],
     ['key' => 'contact', 'label' => 'Contact', 'href' => 'contact.php'],
 ];
