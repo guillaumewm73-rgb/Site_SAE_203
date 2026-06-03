@@ -90,7 +90,7 @@ require __DIR__ . '/includes/header.php';
                             <p>
                                 <?= e($visitorName !== '' ? $visitorName : 'Votre réservation'); ?>
                                 est bien enregistrée avec le contact
-                                <strong><?= e($contact); ?>. Veuillez consulter vos spam si vous n'avz pas reçu le mail.</strong>.
+                                <strong><?= e($contact); ?>. <br> Veuillez consulter vos spam si vous n'avz pas reçu le mail.</strong>.
                             </p>
                         </div>
                         <span class="confirmation-status">Confirmé</span>
