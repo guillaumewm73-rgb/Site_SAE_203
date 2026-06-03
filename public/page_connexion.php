@@ -76,7 +76,7 @@ require __DIR__ . '/includes/header.php';
                         Renseignez le numéro de réservation et le mail ou téléphone utilisé lors de la réservation.
                     </p>
 
-                    <form class="auth-form" method="post" action="connexion.php">
+                    <form class="auth-form" method="post" action="">
                         <label class="auth-field">
                             <span>Numéro de réservation</span>
                             <input
