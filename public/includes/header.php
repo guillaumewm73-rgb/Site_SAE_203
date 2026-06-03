@@ -29,15 +29,6 @@ if ($currentRole === 'admin') {
     $navLinks[] = ['key' => 'admin', 'label' => 'Admin', 'href' => 'admin.php'];
 }
 
-if ($currentRole === 'visiteur') {
-    foreach ($navLinks as &$link) {
-        if ($link['key'] === 'connexion') {
-            $link['label'] = 'se déconnecter';
-            break;
-        }
-    }
-    unset($link);
-}
 
 ?>
 <!doctype html>
