@@ -243,6 +243,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 (int) $slot['people']
             );
 
+            $updatedReservation = getReservationDetailsById($conn, (int) $editReservationId);
+            if ($updatedReservation) {
+                sendReservationNotificationEmail(
+                    'updated',
+                    (string) $updatedReservation['prenom'],
+                    (string) $updatedReservation['nom'],
+                    (string) $updatedReservation['moyen_comm'],
+                    [$updatedReservation],
+                    $roomCatalog
+                );
+            }
+
             $_SESSION['visiteur_nom'] = trim($prenom . ' ' . $nom);
             $_SESSION['visiteur_contact'] = $contact;
 
@@ -286,12 +298,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw $exception;
         }
 
-        // Envoi de l'email de confirmation
+        $createdReservationDetails = [];
+        foreach ($createdReservations as $createdReservation) {
+            $reservationDetails = getReservationDetailsById($conn, (int) $createdReservation['id']);
+            if ($reservationDetails) {
+                $createdReservationDetails[] = $reservationDetails;
+            }
+        }
+
+        // Envoi de l'email de confirmation.
         $emailSent = sendConfirmationEmail(
             $prenom,
             $nom,
             $contact,
-            $createdReservations,
+            $createdReservationDetails ?: $createdReservations,
             $roomCatalog
         );
 

@@ -781,38 +781,49 @@ function extractEmailFromContact(string $contact): string
 
 function reservationEmailSubject(string $type): string
 {
-    return match ($type) {
-        'updated' => 'Votre réservation e-llusion a été modifiée',
-        'deleted' => 'Votre réservation e-llusion a été supprimée',
-        default => 'Votre réservation e-llusion est confirmée',
-    };
+    switch ($type) {
+        case 'updated':
+            return 'Votre réservation e-llusion a été modifiée';
+        case 'deleted':
+            return 'Votre réservation e-llusion a été supprimée';
+        default:
+            return 'Votre réservation e-llusion est confirmée';
+    }
 }
 
 function reservationEmailTitle(string $type): string
 {
-    return match ($type) {
-        'updated' => 'Réservation modifiée',
-        'deleted' => 'Réservation supprimée',
-        default => 'Réservation confirmée',
-    };
+    switch ($type) {
+        case 'updated':
+            return 'Réservation modifiée';
+        case 'deleted':
+            return 'Réservation supprimée';
+        default:
+            return 'Réservation confirmée';
+    }
 }
 
 function reservationEmailIntro(string $type): string
 {
-    return match ($type) {
-        'updated' => 'Votre réservation pour l’exposition e-llusion vient d’être modifiée. Voici le nouveau récapitulatif.',
-        'deleted' => 'Votre réservation pour l’exposition e-llusion vient d’être supprimée. Voici le récapitulatif de la réservation annulée.',
-        default => 'Votre réservation pour l’exposition e-llusion est bien enregistrée. Voici le récapitulatif de votre visite.',
-    };
+    switch ($type) {
+        case 'updated':
+            return 'Votre réservation pour l’exposition e-llusion vient d’être modifiée. Voici le nouveau récapitulatif.';
+        case 'deleted':
+            return 'Votre réservation pour l’exposition e-llusion vient d’être supprimée. Voici le récapitulatif de la réservation annulée.';
+        default:
+            return 'Votre réservation pour l’exposition e-llusion est bien enregistrée. Voici le récapitulatif de votre visite.';
+    }
 }
 
 function reservationEmailStatusColor(string $type): string
 {
-    return match ($type) {
-        'updated' => '#3ce8d7',
-        'deleted' => '#e71919',
-        default => '#3ce8d7',
-    };
+    switch ($type) {
+        case 'deleted':
+            return '#e71919';
+        case 'updated':
+        default:
+            return '#3ce8d7';
+    }
 }
 
 function buildReservationEmailBody(
