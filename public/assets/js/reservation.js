@@ -101,7 +101,7 @@ form.addEventListener('submit', (event) => {
         event.preventDefault();
         const firstInvalidField = form.querySelector(':invalid');
 
-        feedback.textContent = 'Complétez les champs obligatoires avant de confirmer l’inscription.';
+        feedback.textContent = 'Complétez les champs obligatoires avant de confirmer la réservation.';
         feedback.classList.remove('is-success');
         feedback.classList.add('is-error');
         firstInvalidField?.focus();
@@ -123,13 +123,13 @@ form.addEventListener('submit', (event) => {
     const peopleCount = Array.from(document.querySelectorAll('[data-slot-people]'))
         .reduce((total, select) => total + Number(select.value), 0);
 
-    feedback.textContent = `Envoi de votre inscription : ${slotCount} créneau${slotCount > 1 ? 'x' : ''}, ${peopleCount} personne${peopleCount > 1 ? 's' : ''} au total.`;
+    feedback.textContent = `Envoi de votre réservation : ${slotCount} créneau${slotCount > 1 ? 'x' : ''}, ${peopleCount} personne${peopleCount > 1 ? 's' : ''} au total.`;
     feedback.classList.add('is-success');
     feedback.classList.remove('is-error');
 
     if (submitButton) {
         submitButton.disabled = true;
-        submitButton.textContent = 'Inscription en cours...';
+        submitButton.textContent = 'Réservation en cours...';
     }
 });
 
