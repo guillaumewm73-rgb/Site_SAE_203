@@ -63,6 +63,53 @@ function adminBoolValue(mixed $value): int
     return in_array($normalized, ['1', 'oui', 'yes', 'true'], true) ? 1 : 0;
 }
 
+function exportAdminReservationsCsv(array $reservations): never
+{
+    $filename = 'inscriptions-e-llusion-' . date('Y-m-d') . '.csv';
+
+    header('Content-Type: text/csv; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+
+    echo "\xEF\xBB\xBF";
+
+    $output = fopen('php://output', 'w');
+
+    fputcsv($output, [
+        'ID reservation',
+        'Nom',
+        'Prenom',
+        'Identifiant',
+        'Categorie',
+        'Jour',
+        'Date',
+        'Heure',
+        'Salle',
+        'Nom salle',
+        'Nombre de personnes',
+        'Buffet jeudi 19h',
+    ], ';');
+
+    foreach ($reservations as $reservation) {
+        fputcsv($output, [
+            $reservation['reservation_id'],
+            $reservation['nom'],
+            $reservation['prenom'],
+            $reservation['moyen_comm'],
+            $reservation['categorie'],
+            $reservation['nom_jour'],
+            $reservation['date_jour'],
+            adminFormatTime((string) $reservation['heure_debut']),
+            $reservation['numero_salle'],
+            $reservation['nom_salle'],
+            $reservation['nombre_personnes'],
+            adminBoolValue($reservation['participe_buffet']) === 1 ? 'Oui' : 'Non',
+        ], ';');
+    }
+
+    fclose($output);
+    exit;
+}
+
 function redirectAdmin(string $status, string $search, string $day): never
 {
     $params = ['status' => $status];
@@ -144,6 +191,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $categories = getAdminCategories($conn);
 $slots = getAdminSlots($conn);
 $reservations = getAdminReservations($conn, $search);
+
+if ((string) ($_GET['export'] ?? '') === 'csv') {
+    exportAdminReservationsCsv($reservations);
+}
+
 $availabilityRows = getAdminAvailability($conn);
 
 $availabilityDays = [];
@@ -377,7 +429,19 @@ require __DIR__ . '/includes/header.php';
                             <h2 id="reservations-title">Inscriptions</h2>
                             <p>Recherche, édition et suppression</p>
                         </div>
-                        <strong data-admin-count><?= count($reservations); ?> résultat<?= count($reservations) > 1 ? 's' : ''; ?></strong>
+                        <div class="admin-panel-actions">
+                            <strong data-admin-count><?= count($reservations); ?> résultat<?= count($reservations) > 1 ? 's' : ''; ?></strong>
+                            <a
+                                class="button button-secondary"
+                                href="admin.php?<?= e(http_build_query(array_filter([
+                                    'search' => $search,
+                                    'day' => $selectedDay,
+                                    'export' => 'csv',
+                                ]))); ?>"
+                            >
+                                Télécharger CSV
+                            </a>
+                        </div>
                     </div>
 
                     <form class="admin-search-field" method="get" action="admin.php">
