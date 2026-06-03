@@ -20,7 +20,6 @@ $cssVersion = filemtime(__DIR__ . '/../assets/css/style.css');
 $navLinks = $navLinks ?? [
     ['key' => 'accueil', 'label' => 'Accueil', 'href' => 'index.php'],
     ['key' => 'salles', 'label' => 'Salles', 'href' => 'index.php#salles'],
-    ['key' => 'connexion', 'label' => 'Connexion', 'href' => 'page_connexion.php'],
     ['key' => 'contact', 'label' => 'Contact', 'href' => 'contact.php'],
 ];
 
@@ -75,5 +74,6 @@ if ($currentRole === 'visiteur') {
         <div class="header-actions">
             <span>18 &amp; 19 juin 2026</span>
             <a class="button button-primary" href="reservation.php">Réserver</a>
+            <a class="button button-primary" href="page_connexion.php">Réserver</a>
         </div>
     </header>
