@@ -324,6 +324,44 @@ function getReservationDetailsByVisitorId(PDO $conn, int $visiteurId): array
     return $req->fetchAll();
 }
 
+function getReservationDetailsForVisitor(PDO $conn, int $reservationId, int $visiteurId): ?array
+{
+    $req = $conn->prepare("
+        SELECT
+            r.id AS reservation_id,
+            r.visiteurs_id,
+            r.salle_creneaux_id,
+            r.nombre_personnes,
+            v.nom,
+            v.prenom,
+            v.moyen_comm,
+            v.categories_visiteur_id,
+            v.participe_buffet,
+            s.numero_salle,
+            s.nom AS nom_salle,
+            s.description AS description_salle,
+            j.nom_jour,
+            j.date_jour,
+            c.heure_debut
+        FROM reservation r
+        JOIN visiteurs v ON r.visiteurs_id = v.id
+        JOIN salle_creneaux sc ON r.salle_creneaux_id = sc.id
+        JOIN salles s ON sc.salles_id = s.id
+        JOIN creneaux c ON sc.creneaux_id = c.id
+        JOIN jour j ON c.jour_id = j.id
+        WHERE r.id = :reservation_id
+          AND r.visiteurs_id = :visiteur_id
+        LIMIT 1
+    ");
+    $req->execute([
+        ':reservation_id' => $reservationId,
+        ':visiteur_id' => $visiteurId,
+    ]);
+    $reservation = $req->fetch();
+
+    return $reservation ?: null;
+}
+
 function createReservation(PDO $conn, int $visiteursId, int $salleCreneauxId, int $nombrePersonnes = 1): string
 {
     $req = $conn->prepare("
@@ -362,6 +400,30 @@ function getSalleCreneauxIdBySelection(PDO $conn, string $dayKey, string $time, 
     $slot = $req->fetch();
 
     return $slot ? (int) $slot['id'] : null;
+}
+
+function getPlacesRestantesForReservationUpdate(PDO $conn, int $salleCreneauxId, int $reservationId): int
+{
+    $req = $conn->prepare("
+        SELECT
+            sc.capacite_max,
+            COALESCE(SUM(CASE WHEN r.id <> :reservation_id THEN r.nombre_personnes ELSE 0 END), 0) AS nb
+        FROM salle_creneaux sc
+        LEFT JOIN reservation r ON r.salle_creneaux_id = sc.id
+        WHERE sc.id = :salle_creneaux_id
+        GROUP BY sc.id, sc.capacite_max
+    ");
+    $req->execute([
+        ':reservation_id' => $reservationId,
+        ':salle_creneaux_id' => $salleCreneauxId,
+    ]);
+    $slot = $req->fetch();
+
+    if (!$slot) {
+        return 0;
+    }
+
+    return max(0, (int) $slot['capacite_max'] - (int) $slot['nb']);
 }
 
 function getReservationById(PDO $conn, int $reservationId): ?array

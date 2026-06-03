@@ -34,6 +34,16 @@ $lookupError = null;
 $lookupMessage = null;
 $accessDenied = (string) ($_GET['access'] ?? '') === 'admin';
 $postedAction = (string) ($_POST['action'] ?? '');
+$deletedReservationId = filter_input(INPUT_GET, 'deleted', FILTER_VALIDATE_INT);
+$updatedReservationId = filter_input(INPUT_GET, 'updated', FILTER_VALIDATE_INT);
+
+if ($deletedReservationId) {
+    $lookupMessage = 'La réservation #' . $deletedReservationId . ' a été supprimée.';
+}
+
+if ($updatedReservationId) {
+    $lookupMessage = 'La réservation #' . $updatedReservationId . ' a été modifiée.';
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' && !$accessDenied && isAdminConnected()) {
     header('Location: admin.php');
@@ -52,8 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $postedAction === 'delete_reservati
     } elseif (!deleteVisitorReservation($conn, $reservationId, (int) $_SESSION['visiteur_id'])) {
         $lookupError = 'Cette réservation ne peut pas être supprimée.';
     } else {
-        $lookupMessage = 'La réservation #' . $reservationId . ' a été supprimée.';
-        $reservationResults = getReservationDetailsByVisitorId($conn, (int) $_SESSION['visiteur_id']);
+        header('Location: page_connexion.php?deleted=' . $reservationId);
+        exit;
     }
 } elseif ($_SERVER['REQUEST_METHOD'] !== 'POST' && !$accessDenied && isVisitorConnected()) {
     $connectedVisitor = ['id' => (int) $_SESSION['visiteur_id']];
@@ -205,7 +215,7 @@ require __DIR__ . '/includes/header.php';
                                     <div class="auth-reservation-actions">
                                         <a
                                             class="button button-secondary"
-                                            href="inscription.php?modifier=<?= e((string) $reservationResult['reservation_id']); ?>"
+                                            href="inscription.php?modifier=<?= e((string) $reservationResult['reservation_id']); ?>#registration-result"
                                         >
                                             Modifier
                                         </a>

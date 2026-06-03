@@ -94,9 +94,45 @@ $registrationData = [
 ];
 
 $registrationError = null;
+$editReservationId = filter_input(INPUT_POST, 'reservation_id', FILTER_VALIDATE_INT)
+    ?: filter_input(INPUT_GET, 'modifier', FILTER_VALIDATE_INT);
+$isEditMode = false;
+$editingReservation = null;
+
+if ($editReservationId) {
+    if (!isVisitorConnected()) {
+        header('Location: page_connexion.php?access=reservation');
+        exit;
+    }
+
+    $editingReservation = getReservationDetailsForVisitor($conn, $editReservationId, (int) $_SESSION['visiteur_id']);
+
+    if ($editingReservation) {
+        $isEditMode = true;
+    } else {
+        $registrationError = 'Cette réservation est introuvable ou ne vous appartient pas.';
+    }
+}
+
+$initialDayKey = $isEditMode ? registrationDayKey((string) $editingReservation['nom_jour']) : array_key_first($visitDays);
+$initialTime = $isEditMode ? registrationFormatTime((string) $editingReservation['heure_debut']) : ($visitDays[$initialDayKey]['times'][0] ?? '');
+$initialRoom = $isEditMode ? (string) $editingReservation['numero_salle'] : array_key_first($rooms);
+$initialPeople = $isEditMode ? (int) $editingReservation['nombre_personnes'] : 1;
+$initialCategoryId = $isEditMode ? (int) $editingReservation['categories_visiteur_id'] : null;
+$initialBuffet = $isEditMode ? (int) $editingReservation['participe_buffet'] : 0;
+
+if ($isEditMode) {
+    $editAvailabilityKey = $initialDayKey . '|' . $initialTime . '|' . $initialRoom;
+    $registrationData['availability'][$editAvailabilityKey] = getPlacesRestantesForReservationUpdate(
+        $conn,
+        (int) $editingReservation['salle_creneaux_id'],
+        (int) $editingReservation['reservation_id']
+    );
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
+        $formAction = (string) ($_POST['form_action'] ?? 'create');
         $prenom = trim((string) ($_POST['firstname'] ?? ''));
         $nom = trim((string) ($_POST['lastname'] ?? ''));
         $contact = trim((string) ($_POST['contact_value'] ?? ''));
@@ -105,15 +141,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $participeBuffet = filter_input(INPUT_POST, 'participates_buffet', FILTER_VALIDATE_INT);
         $postedSlots = $_POST['slots'] ?? [];
 
-        if ($prenom === '' || $nom === '' || $contact === '' || $motDePasse === '') {
+        if ($formAction === 'update_reservation' && (!$editReservationId || !isVisitorConnected())) {
+            throw new RuntimeException('Reconnectez-vous avant de modifier votre réservation.');
+        }
+
+        if ($prenom === '' || $nom === '' || $contact === '') {
+            throw new RuntimeException('Renseignez votre prénom, votre nom et un email ou téléphone.');
+        }
+
+        if ($formAction !== 'update_reservation' && $motDePasse === '') {
             throw new RuntimeException('Renseignez votre prénom, votre nom, un email ou téléphone et un mot de passe.');
         }
 
-        if (strlen($motDePasse) < 4) {
+        if ($formAction !== 'update_reservation' && strlen($motDePasse) < 4) {
             throw new RuntimeException('Le mot de passe doit contenir au moins 4 caractères.');
         }
 
-        if (identifierAlreadyUsed($conn, $contact)) {
+        if ($formAction === 'update_reservation' && identifierAlreadyUsed($conn, $contact, (int) $_SESSION['visiteur_id'])) {
+            throw new RuntimeException('Cet email, téléphone ou identifiant est déjà utilisé par un autre compte.');
+        }
+
+        if ($formAction !== 'update_reservation' && identifierAlreadyUsed($conn, $contact)) {
             throw new RuntimeException('Cet email, téléphone ou identifiant est déjà utilisé. Connectez-vous pour retrouver votre réservation.');
         }
 
@@ -161,8 +209,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $requestedSlots[$salleCreneauxId]['people'] += $people;
         }
 
+        if ($formAction === 'update_reservation' && count($requestedSlots) !== 1) {
+            throw new RuntimeException('La modification concerne une seule réservation à la fois.');
+        }
+
         foreach ($requestedSlots as $slot) {
-            $remainingPlaces = getPlacesRestantes($conn, (int) $slot['salle_creneaux_id']);
+            $remainingPlaces = $formAction === 'update_reservation'
+                ? getPlacesRestantesForReservationUpdate($conn, (int) $slot['salle_creneaux_id'], (int) $editReservationId)
+                : getPlacesRestantes($conn, (int) $slot['salle_creneaux_id']);
 
             if ($slot['people'] > $remainingPlaces) {
                 throw new RuntimeException(
@@ -170,6 +224,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     . $slot['room'] . ' à ' . $slot['time'] . '.'
                 );
             }
+        }
+
+        if ($formAction === 'update_reservation') {
+            $slot = array_values($requestedSlots)[0];
+            $visiteurId = (int) $_SESSION['visiteur_id'];
+
+            updateAdminReservation(
+                $conn,
+                (int) $editReservationId,
+                $visiteurId,
+                $nom,
+                $prenom,
+                $contact,
+                (int) $categorieId,
+                (int) $slot['salle_creneaux_id'],
+                $participeBuffet ?? 0,
+                (int) $slot['people']
+            );
+
+            $_SESSION['visiteur_nom'] = trim($prenom . ' ' . $nom);
+            $_SESSION['visiteur_contact'] = $contact;
+
+            header('Location: page_connexion.php?updated=' . (int) $editReservationId);
+            exit;
         }
 
         $conn->beginTransaction();
@@ -229,7 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = 'Inscription - e-llusion';
+$pageTitle = ($isEditMode ? 'Modifier une réservation' : 'Inscription') . ' - e-llusion';
 $activePage = 'inscription';
 $reserveHref = 'inscription.php';
 $extraScripts = ['assets/js/inscription.js'];
@@ -240,10 +318,11 @@ require __DIR__ . '/includes/header.php';
     <main class="registration-page">
         <section class="registration-hero" aria-labelledby="registration-title">
             <p class="eyebrow">Réservation de visite</p>
-            <h1 id="registration-title">Inscription</h1>
+            <h1 id="registration-title"><?= $isEditMode ? 'Modifier' : 'Inscription'; ?></h1>
             <p>
-                Composez votre visite en choisissant un ou plusieurs créneaux.
-                Indiquez le nombre de personnes présentes, puis choisissez votre moyen de confirmation.
+                <?= $isEditMode
+                    ? 'Modifiez le créneau, la salle ou les informations liées à votre réservation.'
+                    : 'Composez votre visite en choisissant un ou plusieurs créneaux. Indiquez le nombre de personnes présentes, puis choisissez votre moyen de confirmation.'; ?>
             </p>
         </section>
 
@@ -254,13 +333,24 @@ require __DIR__ . '/includes/header.php';
                 </div>
             <?php endif; ?>
 
-            <form class="registration-card" method="post" action="inscription.php" data-registration-form>
+            <form
+                class="registration-card"
+                method="post"
+                action="inscription.php<?= $isEditMode ? '?modifier=' . e((string) $editReservationId) : ''; ?>"
+                data-registration-form
+            >
+                <input type="hidden" name="form_action" value="<?= $isEditMode ? 'update_reservation' : 'create'; ?>">
+                <?php if ($isEditMode): ?>
+                    <input type="hidden" name="reservation_id" value="<?= e((string) $editReservationId); ?>">
+                <?php endif; ?>
+
                 <div class="registration-card-header">
                     <div>
-                        <h2>Composer votre visite</h2>
+                        <h2><?= $isEditMode ? 'Modifier votre réservation' : 'Composer votre visite'; ?></h2>
                         <p>
-                            Sélectionnez un ou les deux jours, puis ajoutez les créneaux souhaités.
-                            La jauge indique les places restantes selon la salle, l’heure et le nombre de personnes.
+                            <?= $isEditMode
+                                ? 'Ajustez la réservation sélectionnée. Votre compte visiteur reste le même.'
+                                : 'Sélectionnez un ou les deux jours, puis ajoutez les créneaux souhaités. La jauge indique les places restantes selon la salle, l’heure et le nombre de personnes.'; ?>
                         </p>
                     </div>
                     <aside class="registration-alert">
@@ -287,7 +377,11 @@ require __DIR__ . '/includes/header.php';
 
                 <fieldset class="registration-block">
                     <legend>2. Créneaux et salles</legend>
-                    <p>Ajoutez un créneau si vous souhaitez visiter plusieurs salles.</p>
+                    <p>
+                        <?= $isEditMode
+                            ? 'Vous modifiez uniquement la réservation sélectionnée.'
+                            : 'Ajoutez un créneau si vous souhaitez visiter plusieurs salles.'; ?>
+                    </p>
 
                     <div class="slot-list" data-slot-list>
                         <article class="slot-entry" data-slot-entry>
@@ -301,7 +395,9 @@ require __DIR__ . '/includes/header.php';
                                     <span>Jour</span>
                                     <select name="slots[0][day]" data-slot-day>
                                         <?php foreach ($visitDays as $dayKey => $day): ?>
-                                            <option value="<?= e($dayKey); ?>"><?= e($day['label']); ?></option>
+                                            <option value="<?= e($dayKey); ?>" <?= $dayKey === $initialDayKey ? 'selected' : ''; ?>>
+                                                <?= e($day['label']); ?>
+                                            </option>
                                         <?php endforeach; ?>
                                     </select>
                                 </label>
@@ -309,8 +405,10 @@ require __DIR__ . '/includes/header.php';
                                 <label>
                                     <span>Heure</span>
                                     <select name="slots[0][time]" data-slot-time>
-                                        <?php foreach ($visitDays['jeudi']['times'] as $time): ?>
-                                            <option value="<?= e($time); ?>"><?= e($time); ?></option>
+                                        <?php foreach ($visitDays[$initialDayKey]['times'] as $time): ?>
+                                            <option value="<?= e($time); ?>" <?= $time === $initialTime ? 'selected' : ''; ?>>
+                                                <?= e($time); ?>
+                                            </option>
                                         <?php endforeach; ?>
                                     </select>
                                 </label>
@@ -319,7 +417,7 @@ require __DIR__ . '/includes/header.php';
                                     <span>Salle</span>
                                     <select name="slots[0][room]" data-slot-room>
                                         <?php foreach ($rooms as $roomNumber => $room): ?>
-                                            <option value="<?= e($roomNumber); ?>">
+                                            <option value="<?= e($roomNumber); ?>" <?= $roomNumber === $initialRoom ? 'selected' : ''; ?>>
                                                 Salle <?= e($roomNumber); ?> - <?= e($room['title']); ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -330,7 +428,9 @@ require __DIR__ . '/includes/header.php';
                                     <span>Nombre de personnes</span>
                                     <select name="slots[0][people]" data-slot-people>
                                         <?php for ($people = 1; $people <= 12; $people++): ?>
-                                            <option value="<?= $people; ?>"><?= $people; ?></option>
+                                            <option value="<?= $people; ?>" <?= $people === $initialPeople ? 'selected' : ''; ?>>
+                                                <?= $people; ?>
+                                            </option>
                                         <?php endfor; ?>
                                     </select>
                                 </label>
@@ -340,7 +440,7 @@ require __DIR__ . '/includes/header.php';
                         </article>
                     </div>
 
-                    <button class="button button-secondary add-slot-button" type="button" data-add-slot>
+                    <button class="button button-secondary add-slot-button" type="button" data-add-slot <?= $isEditMode ? 'hidden' : ''; ?>>
                         Ajouter un créneau
                     </button>
                 </fieldset>
@@ -352,7 +452,10 @@ require __DIR__ . '/includes/header.php';
                             <span>Qui êtes-vous ?</span>
                             <select name="visitor_type" required>
                                 <?php foreach ($categories as $category): ?>
-                                    <option value="<?= e((string) $category['id']); ?>">
+                                    <option
+                                        value="<?= e((string) $category['id']); ?>"
+                                        <?= $initialCategoryId === (int) $category['id'] ? 'selected' : ''; ?>
+                                    >
                                         <?= e((string) $category['libelle']); ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -361,12 +464,24 @@ require __DIR__ . '/includes/header.php';
 
                         <label>
                             <span>Prénom</span>
-                            <input type="text" name="firstname" autocomplete="given-name" required>
+                            <input
+                                type="text"
+                                name="firstname"
+                                autocomplete="given-name"
+                                required
+                                value="<?= e((string) ($editingReservation['prenom'] ?? '')); ?>"
+                            >
                         </label>
 
                         <label>
                             <span>Nom</span>
-                            <input type="text" name="lastname" autocomplete="family-name" required>
+                            <input
+                                type="text"
+                                name="lastname"
+                                autocomplete="family-name"
+                                required
+                                value="<?= e((string) ($editingReservation['nom'] ?? '')); ?>"
+                            >
                         </label>
 
                         <label>
@@ -377,23 +492,27 @@ require __DIR__ . '/includes/header.php';
                                 autocomplete="email tel"
                                 placeholder="prenom.nom@email.fr ou 06 00 00 00 00"
                                 required
+                                value="<?= e((string) ($editingReservation['moyen_comm'] ?? '')); ?>"
                             >
                         </label>
 
-                        <label>
-                            <span>Mot de passe</span>
-                            <input
-                                type="password"
-                                name="password"
-                                autocomplete="new-password"
-                                minlength="4"
-                                required
-                            >
-                        </label>
+                        <?php if (!$isEditMode): ?>
+                            <label>
+                                <span>Mot de passe</span>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    autocomplete="new-password"
+                                    minlength="4"
+                                    required
+                                >
+                            </label>
+                        <?php endif; ?>
 
                         <p class="visitor-grid-note">
-                            Votre email ou téléphone servira d’identifiant de connexion.
-                            Le mot de passe choisi ici servira à vous reconnecter pour consulter votre réservation.
+                            <?= $isEditMode
+                                ? 'Vous êtes connecté·e : la modification garde votre compte existant, sans recréer de mot de passe.'
+                                : 'Votre email ou téléphone servira d’identifiant de connexion. Le mot de passe choisi ici servira à vous reconnecter pour consulter votre réservation.'; ?>
                         </p>
                     </div>
                 </fieldset>
@@ -403,7 +522,7 @@ require __DIR__ . '/includes/header.php';
                     <p>Indiquez si vous serez présent·e au buffet organisé le jeudi à 19h.</p>
                     <div class="buffet-choice-grid">
                         <label class="buffet-choice">
-                            <input type="radio" name="participates_buffet" value="1">
+                            <input type="radio" name="participates_buffet" value="1" <?= $initialBuffet === 1 ? 'checked' : ''; ?>>
                             <span class="red-dot"></span>
                             <span>
                                 <strong>Oui, je serai présent·e</strong>
@@ -412,7 +531,7 @@ require __DIR__ . '/includes/header.php';
                         </label>
 
                         <label class="buffet-choice">
-                            <input type="radio" name="participates_buffet" value="0" checked>
+                            <input type="radio" name="participates_buffet" value="0" <?= $initialBuffet === 0 ? 'checked' : ''; ?>>
                             <span class="red-dot"></span>
                             <span>
                                 <strong>Non, je ne participe pas</strong>
@@ -427,7 +546,7 @@ require __DIR__ . '/includes/header.php';
                         Les places restantes se recalculent selon le jour, l’heure et la salle.
                     </p>
                     <button class="button button-primary" type="submit" data-submit-registration>
-                        Confirmer l’inscription
+                        <?= $isEditMode ? 'Enregistrer les modifications' : 'Confirmer l’inscription'; ?>
                     </button>
                 </div>
             </form>
