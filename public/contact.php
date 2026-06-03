@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 $pageTitle = 'Contact - e-llusion';
 $activePage = 'contact';
-$reserveHref = 'inscription.php';
+$reserveHref = 'reservation.php';
 
 require __DIR__ . '/includes/header.php';
 ?>

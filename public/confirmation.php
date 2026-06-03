@@ -64,20 +64,20 @@ if (is_array($reservationIds)) {
 }
 
 $pageTitle = 'Confirmation - e-llusion';
-$activePage = 'inscription';
+$activePage = 'reservation';
 $bodyClass = 'confirmation-page';
-$reserveHref = 'inscription.php';
+$reserveHref = 'reservation.php';
 
 require __DIR__ . '/includes/header.php';
 ?>
 
     <main class="confirmation-page">
         <section class="confirmation-hero" aria-labelledby="confirmation-title">
-            <p class="eyebrow">Inscription confirmée</p>
+            <p class="eyebrow">Réservation confirmée</p>
             <h1 id="confirmation-title">Votre créneau est réservé</h1>
             <p>
                 Retrouvez le récapitulatif de votre visite. Gardez votre numéro de réservation :
-                il permettra de vérifier ou modifier votre inscription si besoin.
+                il permettra de vérifier ou modifier votre réservation si besoin.
             </p>
         </section>
 
@@ -88,7 +88,7 @@ require __DIR__ . '/includes/header.php';
                         <div>
                             <h2>Récapitulatif</h2>
                             <p>
-                                <?= e($visitorName !== '' ? $visitorName : 'Votre inscription'); ?>
+                                <?= e($visitorName !== '' ? $visitorName : 'Votre réservation'); ?>
                                 est bien enregistrée avec le contact
                                 <strong><?= e($contact); ?></strong>.
                             </p>
@@ -147,13 +147,13 @@ require __DIR__ . '/includes/header.php';
                 </article>
             <?php else: ?>
                 <article class="confirmation-card">
-                    <h2>Aucune inscription récente</h2>
+                    <h2>Aucune réservation récente</h2>
                     <p>
                         Cette page affiche la confirmation juste après l'envoi du formulaire.
                         Créez une réservation pour générer un récapitulatif.
                     </p>
                     <div class="confirmation-actions">
-                        <a class="button button-primary" href="inscription.php">Créer une réservation</a>
+                        <a class="button button-primary" href="reservation.php">Créer une réservation</a>
                         <a class="button button-secondary" href="page_connexion.php">Vérifier une réservation</a>
                     </div>
                 </article>

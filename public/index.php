@@ -40,7 +40,7 @@ $rooms = getHomeRoomCards();
 
 $pageTitle = 'e-llusion - Exposition MMI';
 $activePage = 'accueil';
-$reserveHref = 'inscription.php';
+$reserveHref = 'reservation.php';
 $extraScripts = ['assets/js/home.js'];
 
 require __DIR__ . '/includes/header.php';
@@ -142,7 +142,7 @@ require __DIR__ . '/includes/header.php';
                     Vous pouvez réserver une ou plusieurs places selon les disponibilités.
                 </p>
             </div>
-            <a class="button button-primary" href="inscription.php">Commencer l’inscription</a>
+            <a class="button button-primary" href="reservation.php">Commencer la réservation</a>
         </section>
     </main>
 

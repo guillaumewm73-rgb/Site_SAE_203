@@ -307,10 +307,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = ($isEditMode ? 'Modifier une réservation' : 'Inscription') . ' - e-llusion';
-$activePage = 'inscription';
-$reserveHref = 'inscription.php';
-$extraScripts = ['assets/js/inscription.js'];
+$pageTitle = ($isEditMode ? 'Modifier une réservation' : 'Réservation') . ' - e-llusion';
+$activePage = 'reservation';
+$reserveHref = 'reservation.php';
+$extraScripts = ['assets/js/reservation.js'];
 
 require __DIR__ . '/includes/header.php';
 ?>
@@ -318,7 +318,7 @@ require __DIR__ . '/includes/header.php';
     <main class="registration-page">
         <section class="registration-hero" aria-labelledby="registration-title">
             <p class="eyebrow">Réservation de visite</p>
-            <h1 id="registration-title"><?= $isEditMode ? 'Modifier' : 'Inscription'; ?></h1>
+            <h1 id="registration-title"><?= $isEditMode ? 'Modifier' : 'Réservation'; ?></h1>
             <p>
                 <?= $isEditMode
                     ? 'Modifiez le créneau, la salle ou les informations liées à votre réservation.'
@@ -326,7 +326,7 @@ require __DIR__ . '/includes/header.php';
             </p>
         </section>
 
-        <section class="registration-section" id="registration-result" aria-label="Formulaire d'inscription">
+        <section class="registration-section" id="registration-result" aria-label="Formulaire de réservation">
             <?php if ($registrationError): ?>
                 <div class="registration-feedback is-error" role="alert">
                     <?= e($registrationError); ?>
@@ -336,7 +336,7 @@ require __DIR__ . '/includes/header.php';
             <form
                 class="registration-card"
                 method="post"
-                action="inscription.php<?= $isEditMode ? '?modifier=' . e((string) $editReservationId) : ''; ?>"
+                action="reservation.php<?= $isEditMode ? '?modifier=' . e((string) $editReservationId) : ''; ?>"
                 data-registration-form
             >
                 <input type="hidden" name="form_action" value="<?= $isEditMode ? 'update_reservation' : 'create'; ?>">
@@ -546,7 +546,7 @@ require __DIR__ . '/includes/header.php';
                         Les places restantes se recalculent selon le jour, l’heure et la salle.
                     </p>
                     <button class="button button-primary" type="submit" data-submit-registration>
-                        <?= $isEditMode ? 'Enregistrer les modifications' : 'Confirmer l’inscription'; ?>
+                        <?= $isEditMode ? 'Enregistrer les modifications' : 'Confirmer la réservation'; ?>
                     </button>
                 </div>
             </form>
