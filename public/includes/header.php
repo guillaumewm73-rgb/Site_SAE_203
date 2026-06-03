@@ -32,7 +32,7 @@ if ($currentRole === 'admin') {
 if ($currentRole === 'visiteur') {
     foreach ($navLinks as &$link) {
         if ($link['key'] === 'connexion') {
-            $link['label'] = 'Ma réservation';
+            $link['label'] = 'se déconnecter';
             break;
         }
     }
@@ -74,6 +74,6 @@ if ($currentRole === 'visiteur') {
         <div class="header-actions">
             <span>18 &amp; 19 juin 2026</span>
             <a class="button button-primary" href="reservation.php">Réserver</a>
-            <a class="button button-primary" href="page_connexion.php">Réserver</a>
+            <a class="button button-primary" href="page_connexion.php">Connexion</a>
         </div>
     </header>
