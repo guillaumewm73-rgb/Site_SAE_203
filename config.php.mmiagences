@@ -5,3 +5,7 @@ define('SERVEUR_BD', '192.168.135.113');
 define('PORT_BD', 3306);
 define('LOGIN_BD', 'user');
 define('PASSE_BD', 'rQUSxP2xUCxnzU45');
+
+define('MAIL_ENABLED', true);
+define('MAIL_FROM_ADDRESS', 'guillaumewm73@gmail.com');
+define('MAIL_FROM_NAME', 'e-llusion');
