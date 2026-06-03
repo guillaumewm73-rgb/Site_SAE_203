@@ -916,6 +916,19 @@ a {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.visitor-grid-note {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 14px 16px;
+    background: var(--cyan-pale);
+    border-left: 4px solid var(--red);
+    border-radius: 6px;
+    color: var(--black);
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.45;
+}
+
 .slot-fields label,
 .visitor-grid label {
     display: grid;
@@ -1253,6 +1266,12 @@ a {
     background: var(--cyan-pale);
     border: 1px solid rgba(60, 232, 215, 0.45);
     border-radius: 10px;
+}
+
+.auth-result-grid + .auth-result-grid {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(60, 232, 215, 0.45);
 }
 
 .auth-result.is-error {

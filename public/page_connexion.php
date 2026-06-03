@@ -23,29 +23,38 @@ $activePage = 'connexion';
 $bodyClass = 'auth-page';
 $reserveHref = 'inscription.php';
 
-$enteredReservationId = '';
 $enteredContact = '';
+$enteredPassword = '';
 $lookupAttempted = false;
-$reservationResult = null;
+$connectedVisitor = null;
+$reservationResults = [];
 $lookupError = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $lookupAttempted = true;
-    $enteredReservationId = trim((string) ($_POST['reservation_id'] ?? ''));
     $enteredContact = trim((string) ($_POST['contact_value'] ?? ''));
+    $enteredPassword = trim((string) ($_POST['password'] ?? ''));
 
-    if ($enteredReservationId === '' || !ctype_digit($enteredReservationId)) {
-        $lookupError = 'Le numéro de réservation doit contenir uniquement des chiffres.';
-    } elseif ($enteredContact === '') {
-        $lookupError = 'Ajoutez le mail ou le téléphone utilisé lors de la réservation.';
+    if ($enteredContact === '' || $enteredPassword === '') {
+        $lookupError = 'Renseignez votre email ou téléphone et votre mot de passe.';
     } else {
-        $reservationResult = getReservationDetailsById($conn, (int) $enteredReservationId);
+        $admin = getAdminByLogin($conn, $enteredContact);
 
-        if (!$reservationResult) {
-            $lookupError = 'Aucune réservation ne correspond à ce numéro.';
-        } elseif (strcasecmp(trim((string) $reservationResult['moyen_comm']), $enteredContact) !== 0) {
-            $lookupError = 'Le moyen de contact ne correspond pas à cette réservation.';
-            $reservationResult = null;
+        if ($admin && passwordCorresponds($enteredPassword, (string) $admin['password_hash'])) {
+            header('Location: admin.php');
+            exit;
+        }
+
+        $connectedVisitor = getVisitorByCredentials($conn, $enteredContact, $enteredPassword);
+
+        if (!$connectedVisitor) {
+            $lookupError = 'Identifiant ou mot de passe incorrect.';
+        } else {
+            $reservationResults = getReservationDetailsByVisitorId($conn, (int) $connectedVisitor['id']);
+
+            if (!$reservationResults) {
+                $lookupError = 'Votre compte existe, mais aucune réservation n’est associée.';
+            }
         }
     }
 }
@@ -58,8 +67,8 @@ require __DIR__ . '/includes/header.php';
             <p class="eyebrow">Espace visiteur</p>
             <h1 id="reservation-login-title">Connexion réservation</h1>
             <p>
-                Vérifiez votre réservation avec le numéro de téléphone ou le mail utilisé lors de la réservation. 
-                Renseignez ensuite le mot de passe pour accéder à votre espace personnel et découvrir les détails de votre visite.
+                Connectez-vous avec le mail ou le téléphone renseigné lors de l'inscription,
+                puis utilisez le mot de passe choisi pour retrouver directement votre réservation.
             </p>
 
             <div class="hero-buttons">
@@ -73,22 +82,11 @@ require __DIR__ . '/includes/header.php';
                 <article class="auth-card" id="verification">
                     <h2>Connexion à votre compte</h2>
                     <p>
-                        Renseignez le numéro de réservation et le mail ou téléphone utilisé lors de la réservation.
+                        Votre email ou téléphone sert d’identifiant. Si vous êtes administrateur,
+                        utilisez votre login admin et votre mot de passe.
                     </p>
 
-                    <form class="auth-form" method="post" action="connexion.php">
-                        <label class="auth-field">
-                            <span>Numéro de réservation</span>
-                            <input
-                                type="text"
-                                name="reservation_id"
-                                inputmode="numeric"
-                                autocomplete="off"
-                                required
-                                value="<?= e($enteredReservationId); ?>"
-                            >
-                        </label>
-
+                    <form class="auth-form" method="post" action="page_connexion.php">
                         <label class="auth-field">
                             <span>Email ou téléphone</span>
                             <input
@@ -100,51 +98,63 @@ require __DIR__ . '/includes/header.php';
                             >
                         </label>
 
-                        <button class="button button-primary" type="submit">Vérifier ma réservation</button>
+                        <label class="auth-field">
+                            <span>Mot de passe</span>
+                            <input
+                                type="password"
+                                name="password"
+                                autocomplete="current-password"
+                                required
+                            >
+                        </label>
+
+                        <button class="button button-primary" type="submit">Se connecter</button>
                     </form>
 
                     <?php if ($lookupAttempted): ?>
-                        <?php if ($reservationResult): ?>
+                        <?php if ($connectedVisitor && $reservationResults): ?>
                             <div class="auth-result">
                                 <h3>Réservation trouvée</h3>
-                                <div class="auth-result-grid">
-                                    <div class="auth-result-item">
-                                        <span>Réservation</span>
-                                        <strong>#<?= e((string) $reservationResult['reservation_id']); ?></strong>
+                                <?php foreach ($reservationResults as $reservationResult): ?>
+                                    <div class="auth-result-grid">
+                                        <div class="auth-result-item">
+                                            <span>Réservation</span>
+                                            <strong>#<?= e((string) $reservationResult['reservation_id']); ?></strong>
+                                        </div>
+                                        <div class="auth-result-item">
+                                            <span>Visiteur</span>
+                                            <strong><?= e(trim($reservationResult['prenom'] . ' ' . $reservationResult['nom'])); ?></strong>
+                                        </div>
+                                        <div class="auth-result-item">
+                                            <span>Contact</span>
+                                            <strong><?= e((string) $reservationResult['moyen_comm']); ?></strong>
+                                        </div>
+                                        <div class="auth-result-item">
+                                            <span>Salle</span>
+                                            <strong>Salle <?= e((string) $reservationResult['numero_salle']); ?> · <?= e((string) $reservationResult['nom_salle']); ?></strong>
+                                        </div>
+                                        <div class="auth-result-item">
+                                            <span>Date</span>
+                                            <strong><?= e(formatReservationDate((string) $reservationResult['date_jour'])); ?></strong>
+                                        </div>
+                                        <div class="auth-result-item">
+                                            <span>Horaire</span>
+                                            <strong><?= e(formatReservationTime((string) $reservationResult['heure_debut'])); ?></strong>
+                                        </div>
+                                        <div class="auth-result-item">
+                                            <span>Personnes</span>
+                                            <strong><?= e((string) $reservationResult['nombre_personnes']); ?></strong>
+                                        </div>
+                                        <div class="auth-result-item">
+                                            <span>Buffet</span>
+                                            <strong><?= !empty($reservationResult['participe_buffet']) ? 'Oui' : 'Non'; ?></strong>
+                                        </div>
+                                        <div class="auth-result-item">
+                                            <span>Repère salle</span>
+                                            <strong><?= e((string) $reservationResult['description_salle']); ?></strong>
+                                        </div>
                                     </div>
-                                    <div class="auth-result-item">
-                                        <span>Visiteur</span>
-                                        <strong><?= e(trim($reservationResult['prenom'] . ' ' . $reservationResult['nom'])); ?></strong>
-                                    </div>
-                                    <div class="auth-result-item">
-                                        <span>Contact</span>
-                                        <strong><?= e((string) $reservationResult['moyen_comm']); ?></strong>
-                                    </div>
-                                    <div class="auth-result-item">
-                                        <span>Salle</span>
-                                        <strong>Salle <?= e((string) $reservationResult['numero_salle']); ?> · <?= e((string) $reservationResult['nom_salle']); ?></strong>
-                                    </div>
-                                    <div class="auth-result-item">
-                                        <span>Date</span>
-                                        <strong><?= e(formatReservationDate((string) $reservationResult['date_jour'])); ?></strong>
-                                    </div>
-                                    <div class="auth-result-item">
-                                        <span>Horaire</span>
-                                        <strong><?= e(formatReservationTime((string) $reservationResult['heure_debut'])); ?></strong>
-                                    </div>
-                                    <div class="auth-result-item">
-                                        <span>Personnes</span>
-                                        <strong><?= e((string) $reservationResult['nombre_personnes']); ?></strong>
-                                    </div>
-                                    <div class="auth-result-item">
-                                        <span>Buffet</span>
-                                        <strong><?= !empty($reservationResult['participe_buffet']) ? 'Oui' : 'Non'; ?></strong>
-                                    </div>
-                                    <div class="auth-result-item">
-                                        <span>Repère salle</span>
-                                        <strong><?= e((string) $reservationResult['description_salle']); ?></strong>
-                                    </div>
-                                </div>
+                                <?php endforeach; ?>
                             </div>
                         <?php else: ?>
                             <div class="auth-result is-error">
@@ -167,8 +177,8 @@ require __DIR__ . '/includes/header.php';
                     <article class="auth-tip">
                         <h2>Besoin d'aide ?</h2>
                         <p>
-                            Si le numéro ne fonctionne pas, vérifiez l'orthographe du
-                            mail ou du téléphone puis contactez l'équipe de l'exposition.
+                            Si la connexion ne fonctionne pas, vérifiez l'orthographe du
+                            mail ou du téléphone et le mot de passe choisi lors de l'inscription.
                         </p>
                     </article>
                 </aside>

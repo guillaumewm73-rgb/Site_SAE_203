@@ -139,11 +139,12 @@ function createVisiteur(
     ?string $prenom,
     string $moyenComm,
     int $categorieId,
-    int $participeBuffet = 0
+    int $participeBuffet = 0,
+    string $motDePasse = ''
 ): string {
     $req = $conn->prepare("
-        INSERT INTO visiteurs (nom, prenom, moyen_comm, categories_visiteur_id, participe_buffet)
-        VALUES (:nom, :prenom, :moyen_comm, :categorie_id, :participe_buffet)
+        INSERT INTO visiteurs (nom, prenom, moyen_comm, categories_visiteur_id, participe_buffet, mdp)
+        VALUES (:nom, :prenom, :moyen_comm, :categorie_id, :participe_buffet, :mdp)
     ");
     $req->execute([
         ':nom' => $nom,
@@ -151,9 +152,78 @@ function createVisiteur(
         ':moyen_comm' => $moyenComm,
         ':categorie_id' => $categorieId,
         ':participe_buffet' => $participeBuffet,
+        ':mdp' => $motDePasse,
     ]);
 
     return $conn->lastInsertId();
+}
+
+function passwordCorresponds(string $motDePasseSaisi, string $motDePasseStocke): bool
+{
+    if ($motDePasseStocke === '') {
+        return false;
+    }
+
+    $hashInfo = password_get_info($motDePasseStocke);
+
+    if (($hashInfo['algo'] ?? 0) !== 0) {
+        return password_verify($motDePasseSaisi, $motDePasseStocke);
+    }
+
+    return hash_equals($motDePasseStocke, $motDePasseSaisi);
+}
+
+function getAdminByLogin(PDO $conn, string $login): ?array
+{
+    $req = $conn->prepare('SELECT id, login, password_hash FROM admin WHERE login = :login LIMIT 1');
+    $req->execute([':login' => $login]);
+    $admin = $req->fetch();
+
+    return $admin ?: null;
+}
+
+function getVisitorByCredentials(PDO $conn, string $contact, string $motDePasse): ?array
+{
+    $req = $conn->prepare('SELECT * FROM visiteurs WHERE moyen_comm = :contact ORDER BY id DESC');
+    $req->execute([':contact' => $contact]);
+
+    foreach ($req->fetchAll() as $visiteur) {
+        if (passwordCorresponds($motDePasse, (string) ($visiteur['mdp'] ?? ''))) {
+            return $visiteur;
+        }
+    }
+
+    return null;
+}
+
+function getReservationDetailsByVisitorId(PDO $conn, int $visiteurId): array
+{
+    $req = $conn->prepare("
+        SELECT
+            r.id AS reservation_id,
+            r.nombre_personnes,
+            v.nom,
+            v.prenom,
+            v.moyen_comm,
+            v.participe_buffet,
+            s.numero_salle,
+            s.nom AS nom_salle,
+            s.description AS description_salle,
+            j.nom_jour,
+            j.date_jour,
+            c.heure_debut
+        FROM reservation r
+        JOIN visiteurs v ON r.visiteurs_id = v.id
+        JOIN salle_creneaux sc ON r.salle_creneaux_id = sc.id
+        JOIN salles s ON sc.salles_id = s.id
+        JOIN creneaux c ON sc.creneaux_id = c.id
+        JOIN jour j ON c.jour_id = j.id
+        WHERE v.id = :visiteur_id
+        ORDER BY j.date_jour ASC, c.heure_debut ASC, s.numero_salle ASC
+    ");
+    $req->execute([':visiteur_id' => $visiteurId]);
+
+    return $req->fetchAll();
 }
 
 function createReservation(PDO $conn, int $visiteursId, int $salleCreneauxId, int $nombrePersonnes = 1): string
