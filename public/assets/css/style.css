@@ -1024,6 +1024,129 @@ a {
     opacity: 0.7;
 }
 
+.confirmation-page {
+    background: var(--cyan-pale);
+    color: var(--black);
+}
+
+.confirmation-hero {
+    min-height: 300px;
+    padding: 58px 88px 48px;
+    background: var(--black);
+    color: var(--white);
+}
+
+.confirmation-hero h1 {
+    max-width: 980px;
+    margin: 18px 0;
+    font-family: "CutePixel", Helvetica Neue, Helvetica, Arial, sans-serif;
+    font-size: clamp(58px, 6vw, 92px);
+    font-weight: 400;
+    line-height: 0.9;
+}
+
+.confirmation-hero p:not(.eyebrow) {
+    max-width: 760px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 19px;
+    line-height: 1.45;
+}
+
+.confirmation-section {
+    padding: 58px 88px 72px;
+}
+
+.confirmation-card {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 34px;
+    background: var(--white);
+    border: 1px solid var(--cyan);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.confirmation-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 28px;
+    margin-bottom: 22px;
+}
+
+.confirmation-card h2 {
+    margin: 0 0 12px;
+    font-size: 34px;
+}
+
+.confirmation-card p {
+    margin: 0;
+    color: var(--black);
+    line-height: 1.45;
+}
+
+.confirmation-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 18px;
+    border-radius: 999px;
+    background: var(--cyan);
+    color: var(--black);
+    font-weight: 900;
+}
+
+.confirmation-note {
+    margin: 0 0 24px;
+    padding: 16px 18px;
+    background: var(--black);
+    border-left: 5px solid var(--red);
+    color: var(--muted) !important;
+    font-weight: 800;
+}
+
+.confirmation-list {
+    display: grid;
+    gap: 16px;
+}
+
+.confirmation-reservation {
+    display: grid;
+    grid-template-columns: 150px 1.4fr repeat(4, minmax(120px, 1fr));
+    gap: 12px;
+    padding: 18px;
+    background: var(--black);
+    border: 1px solid var(--cyan-dark);
+    border-radius: 8px;
+    color: var(--white);
+}
+
+.confirmation-reservation span,
+.confirmation-reservation strong {
+    display: block;
+}
+
+.confirmation-reservation span {
+    margin-bottom: 6px;
+    color: var(--cyan);
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.confirmation-reservation strong {
+    color: var(--white);
+    line-height: 1.25;
+}
+
+.confirmation-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 14px;
+    margin-top: 26px;
+}
+
 .auth-page,
 .admin-page {
     background: var(--cyan-pale);
@@ -2403,6 +2526,10 @@ a {
 }
 
 @media (max-width: 1180px) {
+    .confirmation-reservation {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     .admin-layout {
         grid-template-columns: 1fr;
     }
@@ -2417,6 +2544,29 @@ a {
 }
 
 @media (max-width: 760px) {
+    .confirmation-hero,
+    .confirmation-section {
+        padding-right: 28px;
+        padding-left: 28px;
+    }
+
+    .confirmation-card {
+        padding: 22px;
+    }
+
+    .confirmation-card-header,
+    .confirmation-actions {
+        flex-direction: column;
+    }
+
+    .confirmation-reservation {
+        grid-template-columns: 1fr;
+    }
+
+    .confirmation-actions .button {
+        width: 100%;
+    }
+
     .admin-interface .admin-hero {
         min-height: auto;
     }

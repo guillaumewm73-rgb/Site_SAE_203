@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 require_once __DIR__ . '/../fonctions.php';
 require __DIR__ . '/includes/donnee_salles.php';
 
@@ -90,7 +94,6 @@ $registrationData = [
 ];
 
 $registrationError = null;
-$registrationSuccess = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
@@ -195,12 +198,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw $exception;
         }
 
-        $registrationSuccess = [
-            'visitor' => trim($prenom . ' ' . $nom),
-            'contact' => $contact,
-            'reservations' => $createdReservations,
-        ];
-
         // Envoi de l'email de confirmation
         $emailSent = sendConfirmationEmail(
             $prenom,
@@ -210,20 +207,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $roomCatalog
         );
 
-        if ($emailSent) {
-            $registrationSuccess['email_sent'] = true;
-        }
+        $_SESSION['latest_reservation_ids'] = array_column($createdReservations, 'id');
+        $_SESSION['latest_confirmation_visitor'] = trim($prenom . ' ' . $nom);
+        $_SESSION['latest_confirmation_contact'] = $contact;
+        $_SESSION['latest_confirmation_email_sent'] = $emailSent;
 
-        $availabilityRows = getAdminAvailability($conn);
-        $availability = [];
-        foreach ($availabilityRows as $row) {
-            $dayKey = registrationDayKey((string) $row['nom_jour']);
-            $time = registrationFormatTime((string) $row['heure_debut']);
-            $roomNumber = (string) $row['numero_salle'];
-
-            $availability[$dayKey . '|' . $time . '|' . $roomNumber] = (int) $row['remaining_places'];
-        }
-        $registrationData['availability'] = $availability;
+        header('Location: confirmation.php');
+        exit;
     } catch (Throwable $exception) {
         $registrationError = $exception->getMessage();
     }
@@ -254,33 +244,7 @@ require __DIR__ . '/includes/header.php';
                 </div>
             <?php endif; ?>
 
-            <?php if ($registrationSuccess): ?>
-                <div class="registration-feedback is-success" role="status">
-                    <h2>Réservation enregistrée</h2>
-                    <p>
-                        <?= e((string) $registrationSuccess['visitor']); ?>,
-                        votre demande est bien enregistrée avec le contact
-                        <?= e((string) $registrationSuccess['contact']); ?>.
-                    </p>
-                    <?php if (isset($registrationSuccess['email_sent']) && $registrationSuccess['email_sent']): ?>
-                        <p style="margin-top: 10px; font-style: italic; color: #27ae60;">
-                            ✓ Un email de confirmation a été envoyé à <?= e((string) $registrationSuccess['contact']); ?>.
-                        </p>
-                    <?php endif; ?>
-                    <ul>
-                        <?php foreach ($registrationSuccess['reservations'] as $reservation): ?>
-                            <li>
-                                Réservation #<?= e((string) $reservation['id']); ?> :
-                                salle <?= e((string) $reservation['room']); ?>,
-                                <?= e((string) $reservation['time']); ?>,
-                                <?= e((string) $reservation['people']); ?> personne<?= (int) $reservation['people'] > 1 ? 's' : ''; ?>.
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-
-            <form class="registration-card" method="post" action="inscription.php#registration-result" data-registration-form>
+            <form class="registration-card" method="post" action="inscription.php" data-registration-form>
                 <div class="registration-card-header">
                     <div>
                         <h2>Composer votre visite</h2>
