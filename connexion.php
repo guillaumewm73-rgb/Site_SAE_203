@@ -1,10 +1,10 @@
 <?php
-define('NOM_BD', 'ijtebowcompte13');
-define('SERVEUR_BD', 'ijtebowcompte13.mysql.db');
-define('PORT_BD', '');
-define('LOGIN_BD', 'ijtebowcompte13');
-define('PASSE_BD', 'v8ng67SF2026');
 
+define('NOM_BD', 'sae203_bdd_v1');
+define('SERVEUR_BD', '127.0.0.1');
+define('PORT_BD', 8889);
+define('LOGIN_BD', 'root');
+define('PASSE_BD', 'root');
 
 try {
     $port = defined('PORT_BD') && PORT_BD !== '' ? ';port=' . PORT_BD : '';
