@@ -684,7 +684,7 @@ function searchReservations(PDO $conn, string $query): array
 }
 
 /* ========================================================
-   EMAIL - CONFIRMATION RÉSERVATION
+   EMAIL - NOTIFICATIONS RÉSERVATION
    ======================================================== */
 
 function sendConfirmationEmail(
@@ -694,7 +694,20 @@ function sendConfirmationEmail(
     array $reservations,
     array $roomCatalog = []
 ): bool {
-    if (!defined('MAIL_ENABLED') || !MAIL_ENABLED) {
+    return sendReservationNotificationEmail('created', $prenom, $nom, $contact, $reservations, $roomCatalog);
+}
+
+function sendReservationNotificationEmail(
+    string $type,
+    string $prenom,
+    string $nom,
+    string $contact,
+    array $reservations,
+    array $roomCatalog = []
+): bool {
+    $email = extractEmailFromContact($contact);
+
+    if ($email === '' || !mailConfigurationIsReady()) {
         return false;
     }
 
@@ -703,7 +716,6 @@ function sendConfirmationEmail(
 
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
 
-        // Configuration SMTP
         $mail->isSMTP();
         $mail->Host = MAIL_SMTP_HOST;
         $mail->SMTPAuth = true;
@@ -713,95 +725,234 @@ function sendConfirmationEmail(
         $mail->Port = MAIL_SMTP_PORT;
         $mail->CharSet = 'UTF-8';
 
-        // Destinataire et expéditeur
         $mail->setFrom(MAIL_FROM_ADDRESS, MAIL_FROM_NAME);
-        $mail->addAddress(extractEmailFromContact($contact), trim($prenom . ' ' . $nom));
+        $mail->addAddress($email, trim($prenom . ' ' . $nom));
         $mail->addReplyTo(MAIL_FROM_ADDRESS, MAIL_FROM_NAME);
 
-        // Sujet et contenu
         $mail->isHTML(true);
-        $mail->Subject = 'Confirmation de votre réservation - e-llusion';
-        $mail->Body = buildConfirmationEmailBody($prenom, $nom, $reservations, $roomCatalog);
-        $mail->AltBody = strip_tags($mail->Body);
+        $mail->Subject = reservationEmailSubject($type);
+        $mail->Body = buildReservationEmailBody($type, $prenom, $nom, $reservations, $roomCatalog);
+        $mail->AltBody = buildReservationEmailText($type, $prenom, $nom, $reservations, $roomCatalog);
 
         return $mail->send();
     } catch (\PHPMailer\PHPMailer\Exception $e) {
-        error_log('Erreur PHPMailer: ' . $mail->ErrorInfo);
+        error_log('Erreur PHPMailer: ' . $e->getMessage());
         return false;
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         error_log('Erreur lors de l\'envoi d\'email: ' . $e->getMessage());
         return false;
     }
 }
 
+function mailConfigurationIsReady(): bool
+{
+    if (!defined('MAIL_ENABLED') || !MAIL_ENABLED) {
+        return false;
+    }
+
+    $requiredConstants = [
+        'MAIL_SMTP_HOST',
+        'MAIL_SMTP_USER',
+        'MAIL_SMTP_PASSWORD',
+        'MAIL_SMTP_PORT',
+        'MAIL_FROM_ADDRESS',
+        'MAIL_FROM_NAME',
+    ];
+
+    foreach ($requiredConstants as $constantName) {
+        if (!defined($constantName) || trim((string) constant($constantName)) === '') {
+            return false;
+        }
+    }
+
+    return file_exists(__DIR__ . '/vendor/autoload.php');
+}
+
 function extractEmailFromContact(string $contact): string
 {
-    // Si c'est déjà un email (contient @)
-    if (strpos($contact, '@') !== false) {
-        return trim($contact);
+    $contact = trim($contact);
+
+    if (filter_var($contact, FILTER_VALIDATE_EMAIL)) {
+        return $contact;
     }
-    // Sinon, c'est un téléphone, on ne peut pas envoyer de mail
+
     return '';
 }
 
-function buildConfirmationEmailBody(
+function reservationEmailSubject(string $type): string
+{
+    return match ($type) {
+        'updated' => 'Votre réservation e-llusion a été modifiée',
+        'deleted' => 'Votre réservation e-llusion a été supprimée',
+        default => 'Votre réservation e-llusion est confirmée',
+    };
+}
+
+function reservationEmailTitle(string $type): string
+{
+    return match ($type) {
+        'updated' => 'Réservation modifiée',
+        'deleted' => 'Réservation supprimée',
+        default => 'Réservation confirmée',
+    };
+}
+
+function reservationEmailIntro(string $type): string
+{
+    return match ($type) {
+        'updated' => 'Votre réservation pour l’exposition e-llusion vient d’être modifiée. Voici le nouveau récapitulatif.',
+        'deleted' => 'Votre réservation pour l’exposition e-llusion vient d’être supprimée. Voici le récapitulatif de la réservation annulée.',
+        default => 'Votre réservation pour l’exposition e-llusion est bien enregistrée. Voici le récapitulatif de votre visite.',
+    };
+}
+
+function reservationEmailStatusColor(string $type): string
+{
+    return match ($type) {
+        'updated' => '#3ce8d7',
+        'deleted' => '#e71919',
+        default => '#3ce8d7',
+    };
+}
+
+function buildReservationEmailBody(
+    string $type,
     string $prenom,
     string $nom,
     array $reservations,
     array $roomCatalog = []
 ): string {
-    $body = '<html><body style="font-family: Arial, sans-serif; color: #333;">';
-    $body .= '<div style="max-width: 600px; margin: 0 auto; background-color: #f9f9f9; padding: 20px; border-radius: 8px;">';
+    $title = reservationEmailTitle($type);
+    $intro = reservationEmailIntro($type);
+    $statusColor = reservationEmailStatusColor($type);
+    $contactAddress = defined('MAIL_FROM_ADDRESS') ? (string) MAIL_FROM_ADDRESS : '';
 
-    // En-tête
-    $body .= '<h1 style="color: #2c3e50; margin-bottom: 20px;">Confirmation de réservation</h1>';
-    $body .= '<p>Bonjour <strong>' . htmlspecialchars($prenom . ' ' . $nom) . '</strong>,</p>';
-    $body .= '<p>Merci de votre réservation pour l\'exposition <strong>e-llusion</strong>. Voici le détail de vos créneaux :</p>';
+    $body = '<html><body style="margin:0; padding:0; background:#071114; font-family:Helvetica, Arial, sans-serif; color:#ffffff;">';
+    $body .= '<div style="max-width:680px; margin:0 auto; padding:28px 18px;">';
+    $body .= '<div style="background:#000000; border:2px solid #3ce8d7; border-radius:18px; overflow:hidden;">';
+    $body .= '<div style="padding:28px 30px; border-bottom:1px solid rgba(60,232,215,.35);">';
+    $body .= '<p style="margin:0 0 12px; color:#3ce8d7; font-size:14px; font-weight:700;">e-llusion</p>';
+    $body .= '<h1 style="margin:0; color:#ffffff; font-size:34px; line-height:1.05;">' . htmlspecialchars($title) . '</h1>';
+    $body .= '<p style="margin:18px 0 0; color:#d6fbf7; font-size:17px; line-height:1.45;">Bonjour <strong>' . htmlspecialchars(trim($prenom . ' ' . $nom)) . '</strong>,<br>' . htmlspecialchars($intro) . '</p>';
+    $body .= '</div>';
 
-    // Détail des réservations
-    $body .= '<table style="width: 100%; border-collapse: collapse; margin: 20px 0; background-color: white;">';
-    $body .= '<thead>';
-    $body .= '<tr style="background-color: #34495e; color: white;">';
-    $body .= '<th style="padding: 12px; text-align: left; border: 1px solid #bdc3c7;">Salle</th>';
-    $body .= '<th style="padding: 12px; text-align: left; border: 1px solid #bdc3c7;">Créneau</th>';
-    $body .= '<th style="padding: 12px; text-align: center; border: 1px solid #bdc3c7;">Personnes</th>';
-    $body .= '</tr>';
-    $body .= '</thead>';
-    $body .= '<tbody>';
+    $body .= '<div style="padding:26px 30px;">';
+    $body .= '<table style="width:100%; border-collapse:separate; border-spacing:0 12px;">';
 
     foreach ($reservations as $reservation) {
-        $room = isset($roomCatalog[$reservation['room']])
-            ? $roomCatalog[$reservation['room']]['title'] ?? $reservation['room']
-            : $reservation['room'];
-
-        $body .= '<tr style="border-bottom: 1px solid #bdc3c7;">';
-        $body .= '<td style="padding: 10px; border: 1px solid #bdc3c7;">' . htmlspecialchars($room) . '</td>';
-        $body .= '<td style="padding: 10px; border: 1px solid #bdc3c7;">' . htmlspecialchars($reservation['time']) . '</td>';
-        $body .= '<td style="padding: 10px; border: 1px solid #bdc3c7; text-align: center;">' . (int)$reservation['people'] . '</td>';
+        $body .= '<tr>';
+        $body .= '<td style="padding:18px; background:#071114; border:1px solid rgba(60,232,215,.55); border-radius:14px;">';
+        $body .= '<p style="margin:0 0 8px; color:' . $statusColor . '; font-size:13px; font-weight:800;">' . htmlspecialchars(reservationEmailIdLabel($reservation)) . '</p>';
+        $body .= '<h2 style="margin:0 0 12px; color:#ffffff; font-size:22px;">' . htmlspecialchars(reservationEmailRoomLabel($reservation, $roomCatalog)) . '</h2>';
+        $body .= '<p style="margin:0 0 6px; color:#d6fbf7; font-size:16px;"><strong>Date :</strong> ' . htmlspecialchars(reservationEmailDateLabel($reservation)) . '</p>';
+        $body .= '<p style="margin:0 0 6px; color:#d6fbf7; font-size:16px;"><strong>Heure :</strong> ' . htmlspecialchars(reservationEmailTimeLabel($reservation)) . '</p>';
+        $body .= '<p style="margin:0 0 6px; color:#d6fbf7; font-size:16px;"><strong>Nombre de personnes :</strong> ' . htmlspecialchars((string) reservationEmailPeople($reservation)) . '</p>';
+        $body .= '<p style="margin:0; color:#d6fbf7; font-size:16px;"><strong>Buffet du jeudi à 19h :</strong> ' . htmlspecialchars(reservationEmailBuffetLabel($reservation)) . '</p>';
+        $body .= '</td>';
         $body .= '</tr>';
     }
 
-    $body .= '</tbody>';
     $body .= '</table>';
 
-    // Informations importantes
-    $body .= '<div style="background-color: #ecf0f1; padding: 15px; border-left: 4px solid #3498db; margin: 20px 0;">';
-    $body .= '<p><strong>Important :</strong></p>';
-    $body .= '<ul style="margin: 10px 0; padding-left: 20px;">';
-    $body .= '<li>Conservez ce mail comme preuve de votre réservation</li>';
-    $body .= '<li>Présentez-vous 15 minutes avant votre créneau</li>';
-    $body .= '<li>Pour toute modification, contactez-nous</li>';
-    $body .= '</ul>';
+    $body .= '<div style="margin-top:18px; padding:18px; background:#befbf5; border-radius:14px; color:#000000;">';
+    $body .= '<p style="margin:0; font-size:15px; line-height:1.45;"><strong>À retenir :</strong> votre email sert aussi d’identifiant de connexion pour retrouver, modifier ou supprimer votre réservation.</p>';
     $body .= '</div>';
 
-    // Pied de page
-    $body .= '<div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #bdc3c7; font-size: 12px; color: #7f8c8d;">';
-    $body .= '<p>e-llusion - Exposition interactive</p>';
-    $body .= '<p>Pour nous contacter : <a href="mailto:' . htmlspecialchars(MAIL_FROM_ADDRESS) . '">' . htmlspecialchars(MAIL_FROM_ADDRESS) . '</a></p>';
-    $body .= '<p>© ' . date('Y') . ' - Tous droits réservés</p>';
-    $body .= '</div>';
+    if ($contactAddress !== '') {
+        $body .= '<p style="margin:24px 0 0; color:#d6fbf7; font-size:14px;">Contact : <a style="color:#3ce8d7;" href="mailto:' . htmlspecialchars($contactAddress) . '">' . htmlspecialchars($contactAddress) . '</a></p>';
+    }
 
-    $body .= '</div></body></html>';
+    $body .= '</div>';
+    $body .= '</div>';
+    $body .= '</div>';
+    $body .= '</body></html>';
 
     return $body;
+}
+
+function buildReservationEmailText(
+    string $type,
+    string $prenom,
+    string $nom,
+    array $reservations,
+    array $roomCatalog = []
+): string {
+    $lines = [
+        reservationEmailTitle($type),
+        '',
+        'Bonjour ' . trim($prenom . ' ' . $nom) . ',',
+        reservationEmailIntro($type),
+        '',
+    ];
+
+    foreach ($reservations as $reservation) {
+        $lines[] = reservationEmailIdLabel($reservation);
+        $lines[] = reservationEmailRoomLabel($reservation, $roomCatalog);
+        $lines[] = 'Date : ' . reservationEmailDateLabel($reservation);
+        $lines[] = 'Heure : ' . reservationEmailTimeLabel($reservation);
+        $lines[] = 'Personnes : ' . reservationEmailPeople($reservation);
+        $lines[] = 'Buffet jeudi 19h : ' . reservationEmailBuffetLabel($reservation);
+        $lines[] = '';
+    }
+
+    return implode("\n", $lines);
+}
+
+function reservationEmailIdLabel(array $reservation): string
+{
+    $id = $reservation['reservation_id'] ?? $reservation['id'] ?? null;
+
+    return $id ? 'Réservation #' . $id : 'Récapitulatif';
+}
+
+function reservationEmailRoomLabel(array $reservation, array $roomCatalog = []): string
+{
+    $roomNumber = (string) ($reservation['numero_salle'] ?? $reservation['room'] ?? '');
+    $roomName = (string) ($reservation['nom_salle'] ?? '');
+
+    if ($roomName === '' && isset($roomCatalog[$roomNumber])) {
+        $roomName = (string) ($roomCatalog[$roomNumber]['title'] ?? '');
+    }
+
+    return trim('Salle ' . $roomNumber . ($roomName !== '' ? ' · ' . $roomName : ''));
+}
+
+function reservationEmailDateLabel(array $reservation): string
+{
+    $date = (string) ($reservation['date_jour'] ?? '');
+    $dayName = (string) ($reservation['nom_jour'] ?? $reservation['day'] ?? '');
+
+    if ($date === '') {
+        return $dayName !== '' ? ucfirst($dayName) : 'Date à vérifier';
+    }
+
+    $parsedDate = DateTimeImmutable::createFromFormat('Y-m-d', $date);
+
+    if (!$parsedDate) {
+        return trim($dayName . ' ' . $date);
+    }
+
+    return trim($dayName . ' ' . $parsedDate->format('d/m/Y'));
+}
+
+function reservationEmailTimeLabel(array $reservation): string
+{
+    $time = (string) ($reservation['heure_debut'] ?? $reservation['time'] ?? '');
+    $parsedTime = DateTimeImmutable::createFromFormat('H:i:s', $time);
+
+    if ($parsedTime) {
+        return $parsedTime->format('H:i');
+    }
+
+    return $time !== '' ? substr($time, 0, 5) : 'Horaire à vérifier';
+}
+
+function reservationEmailPeople(array $reservation): int
+{
+    return (int) ($reservation['nombre_personnes'] ?? $reservation['people'] ?? 1);
+}
+
+function reservationEmailBuffetLabel(array $reservation): string
+{
+    return !empty($reservation['participe_buffet']) ? 'Oui' : 'Non';
 }
