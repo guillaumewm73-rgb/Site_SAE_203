@@ -64,6 +64,11 @@ a {
 }
 
 .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -72,8 +77,6 @@ a {
     padding: 0 72px;
     border-bottom: 1px solid rgba(60, 232, 215, 0.25);
     background: var(--black);
-    position: fixed;
-    top: 0;
 }
 
 .brand {
