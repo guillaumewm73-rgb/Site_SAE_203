@@ -176,6 +176,11 @@ require __DIR__ . '/includes/header.php';
 
                         <button class="button button-primary" type="submit">Se connecter</button>
                     </form>
+                    </form>
+                    <?php endif; ?>
+
+    
+
 
                     <?php if ($lookupAttempted): ?>
                         <?php if ($connectedVisitor && $reservationResults): ?>
