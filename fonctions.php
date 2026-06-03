@@ -711,37 +711,17 @@ function sendReservationNotificationEmail(
         return false;
     }
 
-    try {
-        require_once __DIR__ . '/vendor/autoload.php';
+    $subject = encodeMailHeader(reservationEmailSubject($type));
+    $body = buildReservationEmailBody($type, $prenom, $nom, $reservations, $roomCatalog);
+    $headers = [
+        'MIME-Version: 1.0',
+        'Content-Type: text/html; charset=UTF-8',
+        'From: ' . encodeMailHeader((string) MAIL_FROM_NAME) . ' <' . MAIL_FROM_ADDRESS . '>',
+        'Reply-To: ' . MAIL_FROM_ADDRESS,
+        'X-Mailer: PHP/' . phpversion(),
+    ];
 
-        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
-
-        $mail->isSMTP();
-        $mail->Host = MAIL_SMTP_HOST;
-        $mail->SMTPAuth = true;
-        $mail->Username = MAIL_SMTP_USER;
-        $mail->Password = MAIL_SMTP_PASSWORD;
-        $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = MAIL_SMTP_PORT;
-        $mail->CharSet = 'UTF-8';
-
-        $mail->setFrom(MAIL_FROM_ADDRESS, MAIL_FROM_NAME);
-        $mail->addAddress($email, trim($prenom . ' ' . $nom));
-        $mail->addReplyTo(MAIL_FROM_ADDRESS, MAIL_FROM_NAME);
-
-        $mail->isHTML(true);
-        $mail->Subject = reservationEmailSubject($type);
-        $mail->Body = buildReservationEmailBody($type, $prenom, $nom, $reservations, $roomCatalog);
-        $mail->AltBody = buildReservationEmailText($type, $prenom, $nom, $reservations, $roomCatalog);
-
-        return $mail->send();
-    } catch (\PHPMailer\PHPMailer\Exception $e) {
-        error_log('Erreur PHPMailer: ' . $e->getMessage());
-        return false;
-    } catch (Throwable $e) {
-        error_log('Erreur lors de l\'envoi d\'email: ' . $e->getMessage());
-        return false;
-    }
+    return mail($email, $subject, $body, implode("\r\n", $headers));
 }
 
 function mailConfigurationIsReady(): bool
@@ -751,10 +731,6 @@ function mailConfigurationIsReady(): bool
     }
 
     $requiredConstants = [
-        'MAIL_SMTP_HOST',
-        'MAIL_SMTP_USER',
-        'MAIL_SMTP_PASSWORD',
-        'MAIL_SMTP_PORT',
         'MAIL_FROM_ADDRESS',
         'MAIL_FROM_NAME',
     ];
@@ -765,7 +741,12 @@ function mailConfigurationIsReady(): bool
         }
     }
 
-    return file_exists(__DIR__ . '/vendor/autoload.php');
+    return filter_var((string) MAIL_FROM_ADDRESS, FILTER_VALIDATE_EMAIL) !== false;
+}
+
+function encodeMailHeader(string $value): string
+{
+    return '=?UTF-8?B?' . base64_encode($value) . '?=';
 }
 
 function extractEmailFromContact(string $contact): string
