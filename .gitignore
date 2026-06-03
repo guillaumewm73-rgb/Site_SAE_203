@@ -1,5 +1,4 @@
 .DS_Store
-config.php
 config/database.php
 vendor/
 composer.lock
