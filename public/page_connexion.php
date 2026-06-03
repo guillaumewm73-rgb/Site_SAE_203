@@ -138,7 +138,6 @@ require __DIR__ . '/includes/header.php';
         <section class="auth-section">
             <div class="auth-grid">
                 <article class="auth-card" id="verification">
-                    <h2>Connexion à votre compte</h2>
 
                     <?php if ($accessDenied && !$lookupAttempted): ?>
                         <div class="auth-result is-error">
