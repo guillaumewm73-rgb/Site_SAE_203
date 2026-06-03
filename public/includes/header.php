@@ -1,5 +1,9 @@
 <?php
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 if (!function_exists('e')) {
     function e(string $value): string
     {
@@ -20,6 +24,26 @@ $navLinks = $navLinks ?? [
     ['key' => 'connexion', 'label' => 'Connexion', 'href' => 'page_connexion.php'],
     ['key' => 'contact', 'label' => 'Contact', 'href' => 'contact.php'],
 ];
+
+$currentRole = (string) ($_SESSION['auth_role'] ?? '');
+
+if ($currentRole === 'admin') {
+    $navLinks[] = ['key' => 'admin', 'label' => 'Admin', 'href' => 'admin.php'];
+}
+
+if ($currentRole === 'visiteur') {
+    foreach ($navLinks as &$link) {
+        if ($link['key'] === 'connexion') {
+            $link['label'] = 'Ma réservation';
+            break;
+        }
+    }
+    unset($link);
+}
+
+if ($currentRole !== '') {
+    $navLinks[] = ['key' => 'deconnexion', 'label' => 'Déconnexion', 'href' => 'deconnexion.php'];
+}
 ?>
 <!doctype html>
 <html lang="fr">

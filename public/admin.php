@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../fonctions.php';
 
+requireAdminSession();
+
 $pageTitle = 'Administration - e-llusion';
 $activePage = 'admin';
 $bodyClass = 'admin-page';

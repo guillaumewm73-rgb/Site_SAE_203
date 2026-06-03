@@ -173,6 +173,71 @@ function passwordCorresponds(string $motDePasseSaisi, string $motDePasseStocke):
     return hash_equals($motDePasseStocke, $motDePasseSaisi);
 }
 
+function startUserSession(): void
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+}
+
+function connectAdminSession(array $admin): void
+{
+    startUserSession();
+    session_regenerate_id(true);
+
+    $_SESSION['auth_role'] = 'admin';
+    $_SESSION['admin_id'] = (int) $admin['id'];
+    $_SESSION['admin_login'] = (string) $admin['login'];
+
+    unset(
+        $_SESSION['visiteur_id'],
+        $_SESSION['visiteur_nom'],
+        $_SESSION['visiteur_contact']
+    );
+}
+
+function connectVisitorSession(array $visiteur): void
+{
+    startUserSession();
+    session_regenerate_id(true);
+
+    $_SESSION['auth_role'] = 'visiteur';
+    $_SESSION['visiteur_id'] = (int) $visiteur['id'];
+    $_SESSION['visiteur_nom'] = trim((string) ($visiteur['prenom'] ?? '') . ' ' . (string) ($visiteur['nom'] ?? ''));
+    $_SESSION['visiteur_contact'] = (string) ($visiteur['moyen_comm'] ?? '');
+
+    unset(
+        $_SESSION['admin_id'],
+        $_SESSION['admin_login']
+    );
+}
+
+function isAdminConnected(): bool
+{
+    startUserSession();
+
+    return ($_SESSION['auth_role'] ?? '') === 'admin'
+        && isset($_SESSION['admin_id']);
+}
+
+function isVisitorConnected(): bool
+{
+    startUserSession();
+
+    return ($_SESSION['auth_role'] ?? '') === 'visiteur'
+        && isset($_SESSION['visiteur_id']);
+}
+
+function requireAdminSession(): void
+{
+    if (isAdminConnected()) {
+        return;
+    }
+
+    header('Location: page_connexion.php?access=admin');
+    exit;
+}
+
 function getAdminByLogin(PDO $conn, string $login): ?array
 {
     $req = $conn->prepare('SELECT id, login, password_hash FROM admin WHERE login = :login LIMIT 1');
