@@ -142,6 +142,10 @@ function createVisiteur(
     int $participeBuffet = 0,
     string $motDePasse = ''
 ): string {
+    if (identifierAlreadyUsed($conn, $moyenComm)) {
+        throw new RuntimeException('Cet email, téléphone ou identifiant est déjà utilisé.');
+    }
+
     $req = $conn->prepare("
         INSERT INTO visiteurs (nom, prenom, moyen_comm, categories_visiteur_id, participe_buffet, mdp)
         VALUES (:nom, :prenom, :moyen_comm, :categorie_id, :participe_buffet, :mdp)
@@ -171,6 +175,35 @@ function passwordCorresponds(string $motDePasseSaisi, string $motDePasseStocke):
     }
 
     return hash_equals($motDePasseStocke, $motDePasseSaisi);
+}
+
+function identifierAlreadyUsed(PDO $conn, string $identifier, ?int $excludeVisitorId = null): bool
+{
+    $identifier = trim($identifier);
+
+    if ($identifier === '') {
+        return false;
+    }
+
+    $adminReq = $conn->prepare('SELECT COUNT(*) AS total FROM admin WHERE login = :identifier');
+    $adminReq->execute([':identifier' => $identifier]);
+
+    if ((int) $adminReq->fetch()['total'] > 0) {
+        return true;
+    }
+
+    $visitorSql = 'SELECT COUNT(*) AS total FROM visiteurs WHERE moyen_comm = :identifier';
+    $params = [':identifier' => $identifier];
+
+    if ($excludeVisitorId !== null) {
+        $visitorSql .= ' AND id <> :exclude_visitor_id';
+        $params[':exclude_visitor_id'] = $excludeVisitorId;
+    }
+
+    $visitorReq = $conn->prepare($visitorSql);
+    $visitorReq->execute($params);
+
+    return (int) $visitorReq->fetch()['total'] > 0;
 }
 
 function startUserSession(): void
@@ -481,6 +514,10 @@ function updateAdminReservation(
     int $participeBuffet,
     int $nombrePersonnes = 1
 ): void {
+    if (identifierAlreadyUsed($conn, $moyenComm, $visiteurId)) {
+        throw new RuntimeException('Cet email, téléphone ou identifiant est déjà utilisé par un autre compte.');
+    }
+
     $conn->beginTransaction();
 
     try {
