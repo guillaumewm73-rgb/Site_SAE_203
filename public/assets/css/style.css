@@ -384,7 +384,7 @@ a {
 .room-title {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 18px;
 }
 
 .red-dot {
