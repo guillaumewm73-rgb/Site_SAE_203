@@ -139,10 +139,6 @@ require __DIR__ . '/includes/header.php';
             <div class="auth-grid">
                 <article class="auth-card" id="verification">
                     <h2>Connexion à votre compte</h2>
-                    <p>
-                        Visiteur : utilisez votre email ou téléphone. Administrateur :
-                        utilisez le login présent dans la table admin.
-                    </p>
 
                     <?php if ($accessDenied && !$lookupAttempted): ?>
                         <div class="auth-result is-error">
