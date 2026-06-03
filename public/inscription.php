@@ -113,6 +113,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new RuntimeException('Le mot de passe doit contenir au moins 4 caractères.');
         }
 
+        if (identifierAlreadyUsed($conn, $contact)) {
+            throw new RuntimeException('Cet email, téléphone ou identifiant est déjà utilisé. Connectez-vous pour retrouver votre réservation.');
+        }
+
         if (!$categorieId) {
             throw new RuntimeException('Sélectionnez votre catégorie de visiteur.');
         }

@@ -231,6 +231,7 @@ require __DIR__ . '/includes/header.php';
                 Suivez les réservations, filtrez les inscriptions et visualisez les places
                 disponibles par salle et par créneau.
             </p>
+            <a class="button button-secondary admin-logout-button" href="deconnexion.php">Déconnexion</a>
         </section>
 
         <?php if ($formError): ?>

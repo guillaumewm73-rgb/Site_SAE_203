@@ -1284,6 +1284,24 @@ a {
     font-size: 24px;
 }
 
+.auth-result-heading {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.auth-result-heading h3 {
+    margin: 0;
+}
+
+.auth-result-heading .button {
+    min-height: 42px;
+    padding: 0 18px;
+}
+
 .auth-result-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2200,6 +2218,10 @@ a {
 .admin-interface .admin-hero {
     min-height: 390px;
     padding-bottom: 82px;
+}
+
+.admin-logout-button {
+    margin-top: 26px;
 }
 
 .admin-layout {

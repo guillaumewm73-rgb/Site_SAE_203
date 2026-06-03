@@ -139,7 +139,10 @@ require __DIR__ . '/includes/header.php';
                     <?php if ($lookupAttempted): ?>
                         <?php if ($connectedVisitor && $reservationResults): ?>
                             <div class="auth-result">
-                                <h3>Réservation trouvée</h3>
+                                <div class="auth-result-heading">
+                                    <h3>Réservation trouvée</h3>
+                                    <a class="button button-secondary" href="deconnexion.php">Déconnexion</a>
+                                </div>
                                 <?php foreach ($reservationResults as $reservationResult): ?>
                                     <div class="auth-result-grid">
                                         <div class="auth-result-item">
