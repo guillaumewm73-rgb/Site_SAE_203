@@ -54,14 +54,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $postedAction === 'delete_reservati
     $lookupAttempted = true;
     $connectedVisitor = isVisitorConnected() ? ['id' => (int) $_SESSION['visiteur_id']] : null;
     $reservationId = filter_input(INPUT_POST, 'reservation_id', FILTER_VALIDATE_INT);
+    $reservationBeforeDelete = $reservationId && $connectedVisitor
+        ? getReservationDetailsForVisitor($conn, $reservationId, (int) $_SESSION['visiteur_id'])
+        : null;
 
     if (!$connectedVisitor) {
         $lookupError = 'Reconnectez-vous avant de supprimer une réservation.';
     } elseif (!$reservationId) {
         $lookupError = 'La réservation à supprimer est introuvable.';
+    } elseif (!$reservationBeforeDelete) {
+        $lookupError = 'Cette réservation est introuvable ou ne vous appartient pas.';
     } elseif (!deleteVisitorReservation($conn, $reservationId, (int) $_SESSION['visiteur_id'])) {
         $lookupError = 'Cette réservation ne peut pas être supprimée.';
     } else {
+        sendReservationNotificationEmail(
+            'deleted',
+            (string) $reservationBeforeDelete['prenom'],
+            (string) $reservationBeforeDelete['nom'],
+            (string) $reservationBeforeDelete['moyen_comm'],
+            [$reservationBeforeDelete]
+        );
+
         header('Location: page_connexion.php?deleted=' . $reservationId);
         exit;
     }

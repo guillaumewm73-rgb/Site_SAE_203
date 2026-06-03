@@ -170,6 +170,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $nombrePersonnes
             );
 
+            $updatedReservation = getReservationDetailsById($conn, $reservationId);
+            if ($updatedReservation) {
+                sendReservationNotificationEmail(
+                    'updated',
+                    (string) $updatedReservation['prenom'],
+                    (string) $updatedReservation['nom'],
+                    (string) $updatedReservation['moyen_comm'],
+                    [$updatedReservation]
+                );
+            }
+
             redirectAdmin('updated', $search, $selectedDay);
         }
 
@@ -180,7 +191,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('Aucune réservation sélectionnée pour la suppression.');
             }
 
+            $reservationBeforeDelete = getReservationDetailsById($conn, $reservationId);
+
             deleteAdminReservation($conn, $reservationId);
+
+            if ($reservationBeforeDelete) {
+                sendReservationNotificationEmail(
+                    'deleted',
+                    (string) $reservationBeforeDelete['prenom'],
+                    (string) $reservationBeforeDelete['nom'],
+                    (string) $reservationBeforeDelete['moyen_comm'],
+                    [$reservationBeforeDelete]
+                );
+            }
+
             redirectAdmin('deleted', $search, $selectedDay);
         }
     } catch (Throwable $exception) {
