@@ -711,17 +711,20 @@ function sendReservationNotificationEmail(
         return false;
     }
 
+    $fromAddress = getMailFromAddress();
+    $replyToAddress = getMailReplyToAddress($fromAddress);
+
     $subject = encodeMailHeader(reservationEmailSubject($type));
     $body = buildReservationEmailBody($type, $prenom, $nom, $reservations, $roomCatalog);
     $headers = [
         'MIME-Version: 1.0',
         'Content-Type: text/html; charset=UTF-8',
-        'From: ' . encodeMailHeader((string) MAIL_FROM_NAME) . ' <' . MAIL_FROM_ADDRESS . '>',
-        'Reply-To: ' . MAIL_FROM_ADDRESS,
+        'From: ' . encodeMailHeader((string) MAIL_FROM_NAME) . ' <' . $fromAddress . '>',
+        'Reply-To: ' . $replyToAddress,
         'X-Mailer: PHP/' . phpversion(),
     ];
 
-    return mail($email, $subject, $body, implode("\r\n", $headers));
+    return mail($email, $subject, $body, implode("\r\n", $headers), '-f' . $fromAddress);
 }
 
 function mailConfigurationIsReady(): bool
@@ -741,7 +744,43 @@ function mailConfigurationIsReady(): bool
         }
     }
 
-    return filter_var((string) MAIL_FROM_ADDRESS, FILTER_VALIDATE_EMAIL) !== false;
+    return getMailFromAddress() !== '';
+}
+
+function getMailFromAddress(): string
+{
+    $configuredAddress = defined('MAIL_FROM_ADDRESS') ? trim((string) MAIL_FROM_ADDRESS) : '';
+
+    if ($configuredAddress !== '' && !mailAddressUsesExternalProvider($configuredAddress)) {
+        return filter_var($configuredAddress, FILTER_VALIDATE_EMAIL) ? $configuredAddress : '';
+    }
+
+    $serverName = $_SERVER['SERVER_NAME'] ?? '';
+    $serverName = strtolower(trim(explode(':', $serverName)[0]));
+
+    if ($serverName !== '' && $serverName !== 'localhost' && strpos($serverName, '.') !== false) {
+        return 'no-reply@' . $serverName;
+    }
+
+    return filter_var($configuredAddress, FILTER_VALIDATE_EMAIL) ? $configuredAddress : '';
+}
+
+function getMailReplyToAddress(string $fallbackAddress): string
+{
+    $replyToAddress = defined('MAIL_REPLY_TO_ADDRESS') ? trim((string) MAIL_REPLY_TO_ADDRESS) : '';
+
+    if (filter_var($replyToAddress, FILTER_VALIDATE_EMAIL)) {
+        return $replyToAddress;
+    }
+
+    return $fallbackAddress;
+}
+
+function mailAddressUsesExternalProvider(string $email): bool
+{
+    $domain = strtolower(substr(strrchr($email, '@') ?: '', 1));
+
+    return in_array($domain, ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com'], true);
 }
 
 function encodeMailHeader(string $value): string

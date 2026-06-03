@@ -9,3 +9,4 @@ define('PASSE_BD', 'rQUSxP2xUCxnzU45');
 define('MAIL_ENABLED', true);
 define('MAIL_FROM_ADDRESS', 'guillaumewm73@gmail.com');
 define('MAIL_FROM_NAME', 'e-llusion');
+define('MAIL_REPLY_TO_ADDRESS', 'guillaumewm73@gmail.com');
