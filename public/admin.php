@@ -229,6 +229,7 @@ foreach ($activeAvailability as $row) {
 ksort($availabilityRooms);
 $matrixColumnCount = max(1, count($availabilityTimes));
 $matrixMinWidth = 90 + ($matrixColumnCount * 82);
+$availabilityUpdatedAt = date('H:i:s');
 
 $roomSummary = [];
 foreach ($availabilityRows as $row) {
@@ -532,7 +533,12 @@ require __DIR__ . '/includes/header.php';
                             <h2 id="availability-title">Places disponibles en temps réel</h2>
                             <p>Vue par salle et par créneau horaire</p>
                         </div>
-                        <p class="admin-legend">Rouge = complet · Cyan = places disponibles</p>
+                        <div class="admin-legend-group">
+                            <p class="admin-legend">Rouge = complet · Cyan = places disponibles</p>
+                            <p class="admin-refresh-status" data-admin-refresh-status>
+                                Dernière mise à jour : <?= e($availabilityUpdatedAt); ?>
+                            </p>
+                        </div>
                     </div>
 
                     <div class="admin-day-tabs" aria-label="Choix du jour affiché">
@@ -553,6 +559,8 @@ require __DIR__ . '/includes/header.php';
                         class="admin-matrix"
                         role="table"
                         aria-label="Disponibilités par salle et par horaire"
+                        data-admin-availability-matrix
+                        data-selected-day="<?= e($selectedDay); ?>"
                         style="grid-template-columns: 82px repeat(<?= e((string) $matrixColumnCount); ?>, 74px); min-width: <?= e((string) $matrixMinWidth); ?>px;"
                     >
                         <div class="admin-matrix-cell is-head">Salle</div>
@@ -568,7 +576,13 @@ require __DIR__ . '/includes/header.php';
                                     $remaining = $cell ? (int) $cell['remaining_places'] : 0;
                                     $capacity = $cell ? (int) $cell['capacite_max'] : 12;
                                 ?>
-                                <div class="admin-matrix-cell <?= $remaining === 0 ? 'is-full' : ''; ?>">
+                                <div
+                                    class="admin-matrix-cell <?= $remaining === 0 ? 'is-full' : ''; ?>"
+                                    data-admin-availability-cell
+                                    data-room="<?= e($roomNumber); ?>"
+                                    data-time="<?= e($time); ?>"
+                                    data-capacity="<?= e((string) $capacity); ?>"
+                                >
                                     <?= e((string) $remaining); ?>/<?= e((string) $capacity); ?>
                                 </div>
                             <?php endforeach; ?>

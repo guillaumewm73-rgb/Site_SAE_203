@@ -26,7 +26,7 @@ require __DIR__ . '/includes/header.php';
                     <p>
                         François PIRANDA - Référent exposition<br>
                         Tél : 06 77 65 97 77<br>
-                        <a href="mailto:mmi-chambery@univ-smb.fr">mmi-chambery@univ-smb.fr</a>
+                        <a href="mailto:françois.piranda@univ-smb.fr">françois.piranda@univ-smb.fr</a>
                     </p>
                     <p>
                         Pour une question de salle, de créneau ou de jauge,

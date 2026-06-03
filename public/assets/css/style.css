@@ -2498,9 +2498,27 @@ a {
 }
 
 .admin-panel-header-wide .admin-legend {
+    margin: 0;
+    text-align: right;
+}
+
+.admin-legend-group {
+    display: grid;
+    gap: 6px;
     max-width: 360px;
     margin: 6px 0 0;
     text-align: right;
+}
+
+.admin-refresh-status {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.admin-refresh-status.is-error {
+    color: var(--red);
 }
 
 .admin-day-tabs {
