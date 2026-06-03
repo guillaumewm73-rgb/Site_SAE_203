@@ -90,7 +90,7 @@ require __DIR__ . '/includes/header.php';
                             <p>
                                 <?= e($visitorName !== '' ? $visitorName : 'Votre réservation'); ?>
                                 est bien enregistrée avec le contact
-                                <strong><?= e($contact); ?></strong>.
+                                <strong><?= e($contact); ?>. Veuillez consulter vos spam si vous n'avz pas reçu le mail.</strong>.
                             </p>
                         </div>
                         <span class="confirmation-status">Confirmé</span>
@@ -102,7 +102,7 @@ require __DIR__ . '/includes/header.php';
                         </p>
                     <?php else: ?>
                         <p class="confirmation-note">
-                            Notez votre numéro de réservation. L'envoi automatique d'email n'est pas actif pour le moment.
+                            Notez votre numéro de réservation.
                         </p>
                     <?php endif; ?>
 
