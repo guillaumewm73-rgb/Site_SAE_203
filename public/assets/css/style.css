@@ -621,6 +621,44 @@ a {
     margin: 0 auto 28px;
 }
 
+.contact-room-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin: 0 auto 28px;
+    max-width: 1160px;
+}
+
+.contact-room-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 210px;
+}
+
+.contact-room-card span {
+    margin-bottom: 14px;
+    color: var(--red);
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.35;
+    text-transform: uppercase;
+}
+
+.contact-room-card h3 {
+    margin: 0 0 10px;
+    font-size: 19px;
+    line-height: 1.2;
+}
+
+.contact-room-card p {
+    margin-bottom: 16px;
+}
+
+.contact-room-card a {
+    margin-top: auto;
+    overflow-wrap: anywhere;
+}
+
 .contact-card h2 {
     margin: 0 0 14px;
     font-size: 25px;
@@ -1634,6 +1672,19 @@ a {
     line-height: 1.35;
 }
 
+.room-referent-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--cyan);
+    font-size: 15px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.room-referent-link:hover {
+    color: var(--red);
+}
+
 .room-hero-visual {
     position: relative;
     min-height: 420px;
@@ -1973,6 +2024,12 @@ a {
         margin-right: 0;
     }
 
+    .contact-room-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-left: 0;
+        margin-right: 0;
+    }
+
     .registration-hero,
     .registration-section {
         padding-left: 24px;
@@ -2106,6 +2163,10 @@ a {
 
     .contact-card {
         padding: 24px;
+    }
+
+    .contact-room-grid {
+        grid-template-columns: 1fr;
     }
 
     .registration-hero h1 {

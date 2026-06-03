@@ -6,6 +6,10 @@ $pageTitle = 'Contact - e-llusion';
 $activePage = 'contact';
 $reserveHref = 'reservation.php';
 
+require __DIR__ . '/includes/donnee_salles.php';
+
+$roomCatalog = getRoomCatalog();
+
 require __DIR__ . '/includes/header.php';
 ?>
 
@@ -35,6 +39,19 @@ require __DIR__ . '/includes/header.php';
                     </p>
                 </div>
             </article>
+
+            <div class="contact-room-grid" aria-label="Référents par salle">
+                <?php foreach ($roomCatalog as $room): ?>
+                    <?php $referent = $room['referent']; ?>
+                    <article class="contact-card contact-room-card">
+                        <span>Salle <?= e($room['number']); ?> · <?= e($room['supportLabel']); ?></span>
+                        <h3><?= e($referent['label']); ?></h3>
+                        <p><?= e($referent['name']); ?></p>
+                        <a href="<?= e($referent['href']); ?>"><?= e($referent['contact']); ?></a>
+                    </article>
+                <?php endforeach; ?>
+            </div>
+
             <a class="button button-primary contact-back" href="index.php">Retour accueil</a>
         </section>
     </main>

@@ -31,6 +31,14 @@ $nextRoom = $currentRoomIndex !== false && $currentRoomIndex < count($roomNumber
                         <span>Fil rouge</span>
                         <strong><?= e($room['focus']); ?></strong>
                     </article>
+
+                    <article class="room-meta-card">
+                        <span><?= e($room['referent']['label']); ?></span>
+                        <strong><?= e($room['referent']['name']); ?></strong>
+                        <a class="room-referent-link" href="<?= e($room['referent']['href']); ?>">
+                            <?= e($room['referent']['contact']); ?>
+                        </a>
+                    </article>
                 </div>
             </div>
 

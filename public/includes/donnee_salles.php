@@ -178,6 +178,33 @@ TEXT,
         '021' => 'TP 1.1 - Community / Distorsion',
     ];
 
+    $roomReferents = [
+        '001' => [
+            'label' => 'Référent TP 2.2',
+            'name' => 'Kylian Provot',
+            'contact' => 'kylian.provot@etu.univ-smb.fr',
+            'href' => 'mailto:kylian.provot@etu.univ-smb.fr',
+        ],
+        '002' => [
+            'label' => 'Référent TP 2.1',
+            'name' => 'Guillaume Willaime Moulin',
+            'contact' => 'Guillaume.Willaime-Moulin@etu.univ-smb.fr',
+            'href' => 'mailto:Guillaume.Willaime-Moulin@etu.univ-smb.fr',
+        ],
+        '005' => [
+            'label' => 'Référente TP 1.2',
+            'name' => 'Cynthia Peinnet',
+            'contact' => 'cpeinnet@aol.com',
+            'href' => 'mailto:cpeinnet@aol.com',
+        ],
+        '021' => [
+            'label' => 'Référent TP 1.1',
+            'name' => 'Benjamin Renollet',
+            'contact' => '06 51 16 82 42',
+            'href' => 'tel:+33651168242',
+        ],
+    ];
+
     $catalog = [];
 
     foreach ($roomOrder as $number => $sourceNumber) {
@@ -186,6 +213,7 @@ TEXT,
         $room['slug'] = 'salle-' . $number . '.php';
         $room['title'] = $roomGroups[$number];
         $room['supportLabel'] = $roomSupportLabels[$number];
+        $room['referent'] = $roomReferents[$number];
         $catalog[$number] = $room;
     }
 
