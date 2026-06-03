@@ -151,6 +151,7 @@ require __DIR__ . '/includes/header.php';
                         </div>
                     <?php endif; ?>
 
+                    <?php if (!isVisitorConnected() && !isAdminConnected()): ?>
                     <form class="auth-form" method="post" action="page_connexion.php">
                         <label class="auth-field">
                             <span>Identifiant</span>
