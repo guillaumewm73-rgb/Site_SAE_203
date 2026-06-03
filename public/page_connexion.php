@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../fonctions.php';
 
+startUserSession();
+
 function formatReservationDate(string $value): string
 {
     $date = DateTimeImmutable::createFromFormat('Y-m-d', $value);
@@ -29,8 +31,22 @@ $lookupAttempted = false;
 $connectedVisitor = null;
 $reservationResults = [];
 $lookupError = null;
+$accessDenied = (string) ($_GET['access'] ?? '') === 'admin';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && !$accessDenied && isAdminConnected()) {
+    header('Location: admin.php');
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' && !$accessDenied && isVisitorConnected()) {
+    $connectedVisitor = ['id' => (int) $_SESSION['visiteur_id']];
+    $reservationResults = getReservationDetailsByVisitorId($conn, (int) $_SESSION['visiteur_id']);
+    $lookupAttempted = true;
+
+    if (!$reservationResults) {
+        $lookupError = 'Votre compte existe, mais aucune réservation n’est associée.';
+    }
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $lookupAttempted = true;
     $enteredContact = trim((string) ($_POST['contact_value'] ?? ''));
     $enteredPassword = trim((string) ($_POST['password'] ?? ''));
@@ -41,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $admin = getAdminByLogin($conn, $enteredContact);
 
         if ($admin && passwordCorresponds($enteredPassword, (string) $admin['password_hash'])) {
+            connectAdminSession($admin);
             header('Location: admin.php');
             exit;
         }
@@ -50,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$connectedVisitor) {
             $lookupError = 'Identifiant ou mot de passe incorrect.';
         } else {
+            connectVisitorSession($connectedVisitor);
             $reservationResults = getReservationDetailsByVisitorId($conn, (int) $connectedVisitor['id']);
 
             if (!$reservationResults) {
@@ -82,17 +100,24 @@ require __DIR__ . '/includes/header.php';
                 <article class="auth-card" id="verification">
                     <h2>Connexion à votre compte</h2>
                     <p>
-                        Votre email ou téléphone sert d’identifiant. Si vous êtes administrateur,
-                        utilisez votre login admin et votre mot de passe.
+                        Visiteur : utilisez votre email ou téléphone. Administrateur :
+                        utilisez le login présent dans la table admin.
                     </p>
+
+                    <?php if ($accessDenied && !$lookupAttempted): ?>
+                        <div class="auth-result is-error">
+                            <h3>Accès administrateur requis</h3>
+                            <p>Connectez-vous avec un compte administrateur pour ouvrir cette page.</p>
+                        </div>
+                    <?php endif; ?>
 
                     <form class="auth-form" method="post" action="page_connexion.php">
                         <label class="auth-field">
-                            <span>Email ou téléphone</span>
+                            <span>Identifiant</span>
                             <input
                                 type="text"
                                 name="contact_value"
-                                autocomplete="email tel"
+                                autocomplete="username"
                                 required
                                 value="<?= e($enteredContact); ?>"
                             >
