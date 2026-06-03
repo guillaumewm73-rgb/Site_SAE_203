@@ -65,6 +65,9 @@ if ($currentRole === 'admin') {
         <div class="header-actions">
             <span>18 &amp; 19 juin 2026</span>
             <a class="button button-primary" href="reservation.php">Réserver</a>
-            <a class="button button-primary" href="page_connexion.php">Connexion</a>
-        </div>
+            <?php if ($currentRole === 'admin' || isset($_SESSION['visiteur_id'])): ?>
+                <a class="button button-secondary" href="deconnexion.php">Déconnexion</a>
+            <?php else: ?>
+                <a class="button button-primary" href="page_connexion.php">Connexion</a>
+            <?php endif; ?>        </div>
     </header>
