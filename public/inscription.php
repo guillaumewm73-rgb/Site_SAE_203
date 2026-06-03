@@ -100,12 +100,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $prenom = trim((string) ($_POST['firstname'] ?? ''));
         $nom = trim((string) ($_POST['lastname'] ?? ''));
         $contact = trim((string) ($_POST['contact_value'] ?? ''));
+        $motDePasse = trim((string) ($_POST['password'] ?? ''));
         $categorieId = filter_input(INPUT_POST, 'visitor_type', FILTER_VALIDATE_INT);
         $participeBuffet = filter_input(INPUT_POST, 'participates_buffet', FILTER_VALIDATE_INT);
         $postedSlots = $_POST['slots'] ?? [];
 
-        if ($prenom === '' || $nom === '' || $contact === '') {
-            throw new RuntimeException('Renseignez votre prénom, votre nom et un email ou téléphone.');
+        if ($prenom === '' || $nom === '' || $contact === '' || $motDePasse === '') {
+            throw new RuntimeException('Renseignez votre prénom, votre nom, un email ou téléphone et un mot de passe.');
+        }
+
+        if (strlen($motDePasse) < 4) {
+            throw new RuntimeException('Le mot de passe doit contenir au moins 4 caractères.');
         }
 
         if (!$categorieId) {
@@ -172,7 +177,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $prenom,
                 $contact,
                 $categorieId,
-                $participeBuffet ?? 0
+                $participeBuffet ?? 0,
+                $motDePasse
             );
 
             $createdReservations = [];
@@ -369,6 +375,22 @@ require __DIR__ . '/includes/header.php';
                                 required
                             >
                         </label>
+
+                        <label>
+                            <span>Mot de passe</span>
+                            <input
+                                type="password"
+                                name="password"
+                                autocomplete="new-password"
+                                minlength="4"
+                                required
+                            >
+                        </label>
+
+                        <p class="visitor-grid-note">
+                            Votre email ou téléphone servira d’identifiant de connexion.
+                            Le mot de passe choisi ici servira à vous reconnecter pour consulter votre réservation.
+                        </p>
                     </div>
                 </fieldset>
 
