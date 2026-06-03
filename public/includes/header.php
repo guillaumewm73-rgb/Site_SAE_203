@@ -41,9 +41,6 @@ if ($currentRole === 'visiteur') {
     unset($link);
 }
 
-if ($currentRole !== '') {
-    $navLinks[] = ['key' => 'deconnexion', 'label' => 'Déconnexion', 'href' => 'deconnexion.php'];
-}
 ?>
 <!doctype html>
 <html lang="fr">
