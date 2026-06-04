@@ -373,24 +373,17 @@ require __DIR__ . '/includes/header.php';
                                 : 'Sélectionnez un ou les deux jours, puis ajoutez les créneaux souhaités. La jauge indique les places restantes selon la salle, l’heure et le nombre de personnes.'; ?>
                         </p>
                     </div>
-                    <aside class="registration-alert">
-                        <strong>12 places maximum</strong>
-                        <span>par salle et par créneau</span>
-                    </aside>
                 </div>
 
                 <fieldset class="registration-block">
                     <legend>1. Jours de visite</legend>
-                    <p>Les visites sont proposées sur les deux journées suivantes. Le choix du jour se fait ensuite dans chaque créneau.</p>
-                    <div class="day-choice-grid">
+                    <p>Les visites sont proposées sur deux journées. Le jour exact se sélectionne dans chaque créneau à l’étape suivante.</p>
+                    <div class="day-info-list">
                         <?php foreach ($visitDays as $day): ?>
-                            <article class="day-choice day-choice-info">
-                                <span class="red-dot"></span>
-                                <span>
-                                    <strong><?= e($day['label']); ?></strong>
-                                    <small><?= e($day['date']); ?></small>
-                                </span>
-                            </article>
+                            <p>
+                                <strong><?= e($day['label']); ?></strong>
+                                <span><?= e($day['date']); ?></span>
+                            </p>
                         <?php endforeach; ?>
                     </div>
                 </fieldset>

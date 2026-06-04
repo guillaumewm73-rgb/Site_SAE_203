@@ -112,7 +112,8 @@ require __DIR__ . '/includes/header.php';
             </div>
 
             <div class="capacity-banner">
-                Places limitées, pensez à réserver votre visite !
+                <strong>12 places maximum</strong>
+                <span>par salle et par créneau</span>
             </div>
 
             <div class="day-grid">

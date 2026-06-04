@@ -304,13 +304,30 @@ a {
 }
 
 .capacity-banner {
+    width: fit-content;
+    max-width: 100%;
     margin: 32px 0;
-    padding: 22px 28px;
+    padding: 24px 30px;
     background: var(--black);
     color: var(--cyan);
     border-radius: 6px;
-    font-size: 22px;
     font-weight: 900;
+}
+
+.capacity-banner strong,
+.capacity-banner span {
+    display: block;
+}
+
+.capacity-banner strong {
+    font-size: 34px;
+    line-height: 1.05;
+}
+
+.capacity-banner span {
+    margin-top: 4px;
+    font-size: 23px;
+    line-height: 1.2;
 }
 
 .day-grid {
@@ -827,24 +844,6 @@ a {
     line-height: 1.45;
 }
 
-.registration-alert {
-    min-width: 230px;
-    padding: 18px;
-    background: var(--black);
-    color: var(--cyan);
-    border-radius: 8px;
-}
-
-.registration-alert strong,
-.registration-alert span {
-    display: block;
-}
-
-.registration-alert strong {
-    margin-bottom: 4px;
-    font-size: 20px;
-}
-
 .registration-block {
     margin: 0 0 28px;
     padding: 26px;
@@ -858,47 +857,36 @@ a {
     font-weight: 900;
 }
 
-.day-choice-grid {
+.day-info-list {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
     margin-top: 18px;
 }
 
-.day-choice {
-    position: relative;
+.day-info-list p {
     display: flex;
-    align-items: center;
-    gap: 14px;
-    min-height: 96px;
-    padding: 18px;
-    background: var(--cyan-pale);
-    border: 2px solid transparent;
-    border-radius: 8px;
-    cursor: pointer;
+    flex-direction: column;
+    gap: 5px;
+    margin: 0;
+    padding-left: 18px;
+    border-left: 4px solid var(--red);
+    color: var(--black);
 }
 
-.day-choice-info {
-    cursor: default;
-}
-
-.day-choice input {
-    position: absolute;
-    opacity: 0;
-}
-
-.day-choice strong,
-.day-choice small {
+.day-info-list strong,
+.day-info-list span {
     display: block;
 }
 
-.day-choice small {
-    margin-top: 5px;
+.day-info-list strong {
+    font-size: 20px;
+    line-height: 1.2;
 }
 
-.day-choice:has(input:checked) {
-    border-color: var(--cyan-dark);
-    box-shadow: inset 0 0 0 1px var(--cyan-dark);
+.day-info-list span {
+    font-size: 15px;
+    line-height: 1.3;
 }
 
 .buffet-choice-grid {
@@ -2167,10 +2155,6 @@ a {
         flex-direction: column;
     }
 
-    .registration-alert {
-        width: 100%;
-    }
-
     .slot-fields,
     .visitor-grid {
         grid-template-columns: 1fr;
@@ -2286,7 +2270,7 @@ a {
         padding: 20px;
     }
 
-    .day-choice-grid,
+    .day-info-list,
     .buffet-choice-grid {
         grid-template-columns: 1fr;
     }
