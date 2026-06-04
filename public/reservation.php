@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $formAction = (string) ($_POST['form_action'] ?? 'create');
         $prenom = trim((string) ($_POST['firstname'] ?? ''));
         $nom = trim((string) ($_POST['lastname'] ?? ''));
-        $contact = trim((string) ($_POST['contact_value'] ?? ''));
+        $contact = strtolower(trim((string) ($_POST['contact_value'] ?? '')));
         $motDePasse = trim((string) ($_POST['password'] ?? ''));
         $categorieId = filter_input(INPUT_POST, 'visitor_type', FILTER_VALIDATE_INT);
         $participeBuffet = filter_input(INPUT_POST, 'participates_buffet', FILTER_VALIDATE_INT);
@@ -146,11 +146,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($prenom === '' || $nom === '' || $contact === '') {
-            throw new RuntimeException('Renseignez votre prénom, votre nom et un email ou téléphone.');
+            throw new RuntimeException('Renseignez votre prénom, votre nom et votre email.');
+        }
+
+        if (!filter_var($contact, FILTER_VALIDATE_EMAIL)) {
+            throw new RuntimeException('Renseignez une adresse email valide.');
         }
 
         if ($formAction !== 'update_reservation' && $motDePasse === '') {
-            throw new RuntimeException('Renseignez votre prénom, votre nom, un email ou téléphone et un mot de passe.');
+            throw new RuntimeException('Renseignez votre prénom, votre nom, votre email et un mot de passe.');
         }
 
         if ($formAction !== 'update_reservation' && strlen($motDePasse) < 4) {
@@ -158,11 +162,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($formAction === 'update_reservation' && identifierAlreadyUsed($conn, $contact, (int) $_SESSION['visiteur_id'])) {
-            throw new RuntimeException('Cet email, téléphone ou identifiant est déjà utilisé par un autre compte.');
+            throw new RuntimeException('Cet email est déjà utilisé par un autre compte.');
         }
 
         if ($formAction !== 'update_reservation' && identifierAlreadyUsed($conn, $contact)) {
-            throw new RuntimeException('Cet email, téléphone ou identifiant est déjà utilisé. Connectez-vous pour retrouver votre réservation.');
+            throw new RuntimeException('Cet email est déjà utilisé. Connectez-vous pour retrouver votre réservation.');
         }
 
         if (!$categorieId) {
@@ -498,12 +502,12 @@ require __DIR__ . '/includes/header.php';
                         </label>
 
                         <label>
-                            <span>Email ou téléphone</span>
+                            <span>Email</span>
                             <input
-                                type="text"
+                                type="email"
                                 name="contact_value"
-                                autocomplete="email tel"
-                                placeholder="prenom.nom@email.fr ou 06 00 00 00 00"
+                                autocomplete="email"
+                                placeholder="prenom.nom@email.fr"
                                 required
                                 value="<?= e((string) ($editingReservation['moyen_comm'] ?? '')); ?>"
                             >
@@ -542,7 +546,7 @@ require __DIR__ . '/includes/header.php';
                         <p class="visitor-grid-note">
                             <?= $isEditMode
                                 ? 'Vous êtes connecté·e : la modification garde votre compte existant, sans recréer de mot de passe.'
-                                : 'Votre email ou téléphone servira d’identifiant de connexion. Le mot de passe choisi ici servira à vous reconnecter pour consulter votre réservation.'; ?>
+                                : 'Votre email servira d’identifiant de connexion. Le mot de passe choisi ici servira à vous reconnecter pour consulter votre réservation.'; ?>
                         </p>
                     </div>
                 </fieldset>

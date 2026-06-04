@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $postedAction === 'delete_reservati
     $enteredPassword = trim((string) ($_POST['password'] ?? ''));
 
     if ($enteredContact === '' || $enteredPassword === '') {
-        $lookupError = 'Renseignez votre email ou téléphone et votre mot de passe.';
+        $lookupError = 'Renseignez votre email ou votre login admin, puis votre mot de passe.';
     } else {
         $admin = getAdminByLogin($conn, $enteredContact);
 
@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $postedAction === 'delete_reservati
         $connectedVisitor = getVisitorByCredentials($conn, $enteredContact, $enteredPassword);
 
         if (!$connectedVisitor) {
-            $lookupError = 'Identifiant ou mot de passe incorrect.';
+            $lookupError = 'Email, login admin ou mot de passe incorrect.';
         } else {
             connectVisitorSession($connectedVisitor);
             $reservationResults = getReservationDetailsByVisitorId($conn, (int) $connectedVisitor['id']);
@@ -125,8 +125,8 @@ require __DIR__ . '/includes/header.php';
             <p class="eyebrow">Espace visiteur</p>
             <h1 id="reservation-login-title">Connexion réservation</h1>
             <p>
-                Connectez-vous avec le mail ou le téléphone renseigné lors de la réservation, et
-                puis utilisez le mot de passe choisi pour retrouver directement votre réservation.
+                Visiteur : connectez-vous avec l’email renseigné lors de la réservation.
+                Administrateur : utilisez votre login admin.
             </p>
 
             <div class="hero-buttons">
@@ -149,11 +149,12 @@ require __DIR__ . '/includes/header.php';
                     <?php if (!isVisitorConnected() && !isAdminConnected()): ?>
                     <form class="auth-form" method="post" action="page_connexion.php">
                         <label class="auth-field">
-                            <span>Identifiant</span>
+                            <span>Email ou login admin</span>
                             <input
                                 type="text"
                                 name="contact_value"
                                 autocomplete="username"
+                                placeholder="prenom.nom@email.fr ou login admin"
                                 required
                                 value="<?= e($enteredContact); ?>"
                             >
@@ -170,7 +171,6 @@ require __DIR__ . '/includes/header.php';
                         </label>
 
                         <button class="button button-primary" type="submit">Se connecter</button>
-                    </form>
                     </form>
                     <?php endif; ?>
 
@@ -198,7 +198,7 @@ require __DIR__ . '/includes/header.php';
                                             <strong><?= e(trim($reservationResult['prenom'] . ' ' . $reservationResult['nom'])); ?></strong>
                                         </div>
                                         <div class="auth-result-item">
-                                            <span>Contact</span>
+                                            <span>Email</span>
                                             <strong><?= e((string) $reservationResult['moyen_comm']); ?></strong>
                                         </div>
                                         <div class="auth-result-item">
@@ -282,8 +282,8 @@ require __DIR__ . '/includes/header.php';
                     <article class="auth-tip">
                         <h2>Besoin d'aide ?</h2>
                         <p>
-                            Si la connexion ne fonctionne pas, vérifiez l'orthographe du
-                            mail ou du téléphone et le mot de passe choisi lors de la réservation.
+                            Si la connexion ne fonctionne pas, vérifiez l'orthographe de
+                            l'email et le mot de passe choisi lors de la réservation.
                         </p>
                     </article>
                 </aside>

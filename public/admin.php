@@ -78,7 +78,7 @@ function exportAdminReservationsCsv(array $reservations): never
         'ID reservation',
         'Nom',
         'Prenom',
-        'Identifiant',
+        'Email',
         'Categorie',
         'Jour',
         'Date',
@@ -143,14 +143,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nombrePersonnes = filter_input(INPUT_POST, 'nombre_personnes', FILTER_VALIDATE_INT);
             $nom = trim((string) ($_POST['nom'] ?? ''));
             $prenom = trim((string) ($_POST['prenom'] ?? ''));
-            $moyenComm = trim((string) ($_POST['moyen_comm'] ?? ''));
+            $moyenComm = strtolower(trim((string) ($_POST['moyen_comm'] ?? '')));
 
             if (!$reservationId || !$visiteurId || !$categorieId || !$salleCreneauxId) {
                 throw new RuntimeException('La réservation sélectionnée est incomplète.');
             }
 
             if ($nom === '' || $moyenComm === '') {
-                throw new RuntimeException('Le nom et le moyen de contact sont obligatoires.');
+                throw new RuntimeException('Le nom et l’email sont obligatoires.');
+            }
+
+            if (!filter_var($moyenComm, FILTER_VALIDATE_EMAIL)) {
+                throw new RuntimeException('Renseignez une adresse email valide.');
             }
 
             if (!$nombrePersonnes || $nombrePersonnes < 1 || $nombrePersonnes > 12) {
@@ -356,10 +360,11 @@ require __DIR__ . '/includes/header.php';
                     </label>
 
                     <label>
-                        <span>Email ou téléphone</span>
+                        <span>Email</span>
                         <input
-                            type="text"
+                            type="email"
                             name="moyen_comm"
+                            autocomplete="email"
                             required
                             value="<?= e((string) ($selectedReservation['moyen_comm'] ?? '')); ?>"
                         >
@@ -486,7 +491,7 @@ require __DIR__ . '/includes/header.php';
                         <div class="admin-reservation-row admin-reservation-head">
                             <span>Nom</span>
                             <span>Prénom</span>
-                            <span>Contact</span>
+                            <span>Email</span>
                             <span>Jour</span>
                             <span>Heure</span>
                             <span>Salle</span>

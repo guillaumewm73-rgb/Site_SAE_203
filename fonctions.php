@@ -142,8 +142,14 @@ function createVisiteur(
     int $participeBuffet = 0,
     string $motDePasse = ''
 ): string {
+    $moyenComm = strtolower(trim($moyenComm));
+
+    if (!filter_var($moyenComm, FILTER_VALIDATE_EMAIL)) {
+        throw new RuntimeException('Renseignez une adresse email valide.');
+    }
+
     if (identifierAlreadyUsed($conn, $moyenComm)) {
-        throw new RuntimeException('Cet email, téléphone ou identifiant est déjà utilisé.');
+        throw new RuntimeException('Cet email est déjà utilisé.');
     }
 
     $req = $conn->prepare("
@@ -591,8 +597,14 @@ function updateAdminReservation(
     int $participeBuffet,
     int $nombrePersonnes = 1
 ): void {
+    $moyenComm = strtolower(trim($moyenComm));
+
+    if (!filter_var($moyenComm, FILTER_VALIDATE_EMAIL)) {
+        throw new RuntimeException('Renseignez une adresse email valide.');
+    }
+
     if (identifierAlreadyUsed($conn, $moyenComm, $visiteurId)) {
-        throw new RuntimeException('Cet email, téléphone ou identifiant est déjà utilisé par un autre compte.');
+        throw new RuntimeException('Cet email est déjà utilisé par un autre compte.');
     }
 
     $conn->beginTransaction();
