@@ -29,7 +29,6 @@ require __DIR__ . '/includes/header.php';
                     <h2>Contacter référent expo</h2>
                     <p>
                         François PIRANDA - Référent exposition<br>
-                        Tél : 06 77 65 97 77<br>
                         <a href="mailto:françois.piranda@univ-smb.fr">françois.piranda@univ-smb.fr</a>
                     </p>
                     <p>
