@@ -4,6 +4,7 @@ declare(strict_types=1);
 ?>
 
     <main class="room-page">
+        <!-- Template commun aux quatre pages de salle : chaque page fournit simplement le tableau $room. -->
         <section class="room-hero" aria-labelledby="room-title">
             <div class="room-hero-copy">
                 <p class="eyebrow">Salle <?= e($room['number']); ?></p>
@@ -12,6 +13,7 @@ declare(strict_types=1);
                 <p class="room-summary"><?= e($room['summary']); ?></p>
 
                 <div class="room-meta-grid">
+                    <!-- Métadonnées rapides : elles donnent le contexte avant les descriptions longues. -->
                     <article class="room-meta-card">
                         <span>Question directrice</span>
                         <strong><?= e($room['question']); ?></strong>
@@ -33,6 +35,7 @@ declare(strict_types=1);
             </div>
 
             <div class="room-hero-visual">
+                <!-- Image d'ambiance de la salle avec un overlay géré en CSS. -->
                 <img src="<?= e($room['heroImage']); ?>" alt="Illustration de la salle <?= e($room['number']); ?> - <?= e($room['title']); ?>">
                 <div class="room-hero-overlay"></div>
             </div>
@@ -53,6 +56,7 @@ declare(strict_types=1);
 
                 <div class="room-works-grid">
                     <?php foreach ($room['works'] as $work): ?>
+                        <!-- Une carte par œuvre / groupe d'œuvre. Les contenus viennent de donnee_salles.php. -->
                         <article class="room-work-card">
                             <div class="room-work-header">
                                 <span class="red-dot"></span>
@@ -63,6 +67,7 @@ declare(strict_types=1);
                             </div>
 
                             <?php foreach (preg_split('/\R{2,}/', trim($work['description'])) as $paragraph): ?>
+                                <!-- On coupe les descriptions en paragraphes dès qu'il y a une ligne vide. -->
                                 <?php if ($paragraph !== ''): ?>
                                     <p><?= e($paragraph); ?></p>
                                 <?php endif; ?>

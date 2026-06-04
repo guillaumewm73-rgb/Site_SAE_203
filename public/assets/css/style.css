@@ -1,4 +1,5 @@
 @font-face {
+    /* Police de titrage issue de la charte graphique e-llusion. */
     font-family: "CutePixel";
     src: url("../fonts/CutePixel.ttf") format("truetype");
     font-style: normal;
@@ -7,6 +8,7 @@
 }
 
 :root {
+    /* Variables globales : elles évitent de répéter les mêmes couleurs dans tout le fichier. */
     --black: #000000;
     --panel: #071114;
     --cyan-pale: #c5f9f2;
@@ -21,6 +23,7 @@
 *,
 *::before,
 *::after {
+    /* Reset léger : les bordures et paddings sont inclus dans la largeur des éléments. */
     box-sizing: border-box;
 }
 
@@ -29,6 +32,7 @@ html {
 }
 
 body {
+    /* Helvetica Neue est la police de texte courant, CutePixel reste réservée aux grands titres. */
     margin: 0;
     min-height: 100vh;
     background: var(--black);
@@ -64,6 +68,7 @@ a {
 }
 
 .site-header {
+    /* Header commun à toutes les pages, fixé en haut pour garder la navigation accessible. */
     position: fixed;
     top: 0;
     left: 0;
@@ -131,6 +136,7 @@ a {
 }
 
 .button {
+    /* Style commun des boutons pour garder une interface homogène. */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -167,6 +173,7 @@ a {
 }
 
 .hero {
+    /* Zone d'accueil avec le carrousel en arrière-plan. */
     position: relative;
     padding: 64px 0 72px;
     background: var(--black);
@@ -192,6 +199,7 @@ a {
 }
 
 .carousel-slide {
+    /* Les images sont superposées ; la classe is-visible choisit celle affichée. */
     position: absolute;
     inset: 0;
     width: 100%;
@@ -387,6 +395,7 @@ a {
 }
 
 .rooms-section {
+    /* Bloc sombre qui présente les quatre salles juste après le hero. */
     padding: 72px 88px 88px;
     background: var(--black);
 }
@@ -513,6 +522,7 @@ a {
 }
 
 .site-footer {
+    /* Footer partagé par toutes les pages avec infos, logos et liens externes. */
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: start;
@@ -746,6 +756,7 @@ a {
 }
 
 .registration-page {
+    /* Page réservation : fond clair pour distinguer la partie formulaire du reste du site. */
     background: var(--cyan-pale);
     color: var(--black);
 }
@@ -816,6 +827,7 @@ a {
 }
 
 .registration-card {
+    /* Carte principale du formulaire, organisée en étapes numérotées. */
     max-width: 1120px;
     margin: 0 auto;
     padding: 34px;
@@ -1048,6 +1060,7 @@ a {
 }
 
 .password-toggle {
+    /* Bouton œil placé dans le champ mot de passe. */
     position: absolute;
     top: 5px;
     right: 5px;
@@ -1093,6 +1106,7 @@ a {
 }
 
 .slot-capacity {
+    /* Jauge dynamique mise à jour par reservation.js. */
     margin-top: 18px;
     padding: 16px;
     background: rgba(197, 249, 242, 0.1);
@@ -1295,6 +1309,7 @@ a {
 
 .auth-page,
 .admin-page {
+    /* Pages fonctionnelles : connexion et administration partagent la même base visuelle. */
     background: var(--cyan-pale);
     color: var(--black);
 }
@@ -1630,6 +1645,7 @@ a {
 }
 
 .room-page {
+    /* Pages de salle : même DA, mais avec une mise en page plus descriptive. */
     background: linear-gradient(180deg, var(--black) 0 660px, var(--cyan-pale) 660px 100%);
     color: var(--black);
 }
@@ -1979,6 +1995,7 @@ a {
 }
 
 @media (max-width: 980px) {
+    /* Version tablette : on réduit les grilles et on laisse les blocs passer sur une colonne. */
     .site-header {
         align-items: flex-start;
         flex-direction: column;
@@ -2218,6 +2235,7 @@ a {
 }
 
 @media (max-width: 560px) {
+    /* Version mobile : navigation plus compacte et éléments empilés pour rester lisibles. */
     .site-header {
         padding: 22px 16px;
     }
@@ -2395,6 +2413,7 @@ a {
 }
 
 .admin-interface {
+    /* Interface administratrice : dashboard avec édition, recherche et disponibilités. */
     background: linear-gradient(180deg, var(--black) 0 390px, var(--cyan-pale) 390px 100%);
 }
 
@@ -2702,6 +2721,7 @@ a {
 }
 
 .admin-matrix {
+    /* Tableau des disponibilités : les colonnes sont générées en PHP selon les horaires du jour. */
     display: grid;
     grid-template-columns: 82px repeat(10, 74px);
     gap: 8px;

@@ -6,11 +6,13 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// On charge les fonctions BDD puis les textes/images des salles utilisés côté affichage.
 require_once __DIR__ . '/../fonctions.php';
 require __DIR__ . '/includes/donnee_salles.php';
 
 function registrationFormatDate(string $date, string $dayName): string
 {
+    // Petit formatteur maison pour afficher "Jeudi 18 juin" au lieu de "2026-06-18".
     $months = [
         '01' => 'janvier',
         '02' => 'février',
@@ -37,6 +39,7 @@ function registrationFormatDate(string $date, string $dayName): string
 
 function registrationFormatTime(string $time): string
 {
+    // La BDD stocke les heures avec les secondes, l'interface garde seulement HH:MM.
     $parsedTime = DateTimeImmutable::createFromFormat('H:i:s', $time);
 
     return $parsedTime ? $parsedTime->format('H:i') : substr($time, 0, 5);
@@ -44,9 +47,11 @@ function registrationFormatTime(string $time): string
 
 function registrationDayKey(string $dayName): string
 {
+    // Les clés "jeudi" / "vendredi" sont plus simples à envoyer au JavaScript.
     return strtolower(trim($dayName));
 }
 
+// Données nécessaires à la construction du formulaire et de la jauge de places.
 $roomCatalog = getRoomCatalog();
 $categories = getAdminCategories($conn);
 $slotsFromDatabase = getAdminSlots($conn);
@@ -56,6 +61,7 @@ $visitDays = [];
 $rooms = [];
 
 foreach ($slotsFromDatabase as $slot) {
+    // On transforme les lignes SQL en tableaux plus faciles à utiliser dans les <select>.
     $dayKey = registrationDayKey((string) $slot['nom_jour']);
     $time = registrationFormatTime((string) $slot['heure_debut']);
     $roomNumber = (string) $slot['numero_salle'];
@@ -80,6 +86,7 @@ foreach ($slotsFromDatabase as $slot) {
 $availability = [];
 
 foreach ($availabilityRows as $row) {
+    // La clé combine jour + heure + salle pour retrouver très vite les places restantes en JS.
     $dayKey = registrationDayKey((string) $row['nom_jour']);
     $time = registrationFormatTime((string) $row['heure_debut']);
     $roomNumber = (string) $row['numero_salle'];
@@ -93,6 +100,7 @@ $registrationData = [
     'availability' => $availability,
 ];
 
+// Si l'URL contient ?modifier=ID, on bascule le formulaire en mode modification.
 $registrationError = null;
 $editReservationId = filter_input(INPUT_POST, 'reservation_id', FILTER_VALIDATE_INT)
     ?: filter_input(INPUT_GET, 'modifier', FILTER_VALIDATE_INT);
@@ -100,6 +108,7 @@ $isEditMode = false;
 $editingReservation = null;
 
 if ($editReservationId) {
+    // Un visiteur doit être connecté pour modifier sa propre réservation.
     if (!isVisitorConnected()) {
         header('Location: page_connexion.php?access=reservation');
         exit;
@@ -122,6 +131,8 @@ $initialCategoryId = $isEditMode ? (int) $editingReservation['categories_visiteu
 $initialBuffet = $isEditMode ? (int) $editingReservation['participe_buffet'] : 0;
 
 if ($isEditMode) {
+    // En modification, on rend de nouveau disponibles les places de la réservation actuelle.
+    // Sinon le formulaire croirait que ces places sont déjà prises par quelqu'un d'autre.
     $editAvailabilityKey = $initialDayKey . '|' . $initialTime . '|' . $initialRoom;
     $registrationData['availability'][$editAvailabilityKey] = getPlacesRestantesForReservationUpdate(
         $conn,
@@ -132,6 +143,7 @@ if ($isEditMode) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
+        // Récupération propre des données envoyées par le formulaire.
         $formAction = (string) ($_POST['form_action'] ?? 'create');
         $prenom = trim((string) ($_POST['firstname'] ?? ''));
         $nom = trim((string) ($_POST['lastname'] ?? ''));
@@ -141,6 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $participeBuffet = filter_input(INPUT_POST, 'participates_buffet', FILTER_VALIDATE_INT);
         $postedSlots = $_POST['slots'] ?? [];
 
+        // Les validations PHP restent obligatoires car le JavaScript peut être désactivé ou contourné.
         if ($formAction === 'update_reservation' && (!$editReservationId || !isVisitorConnected())) {
             throw new RuntimeException('Reconnectez-vous avant de modifier votre réservation.');
         }
@@ -180,6 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $requestedSlots = [];
 
         foreach ($postedSlots as $slot) {
+            // Chaque bloc de créneau envoyé par JS contient day, time, room et people.
             if (!is_array($slot)) {
                 continue;
             }
@@ -203,6 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('Un créneau sélectionné n’existe pas dans la base de données.');
             }
 
+            // Si le visiteur sélectionne deux fois le même créneau, on additionne les personnes.
             $requestedSlots[$salleCreneauxId] ??= [
                 'salle_creneaux_id' => $salleCreneauxId,
                 'day' => $day,
@@ -218,6 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         foreach ($requestedSlots as $slot) {
+            // Dernière sécurité avant enregistrement : on compare la demande aux places disponibles.
             $remainingPlaces = $formAction === 'update_reservation'
                 ? getPlacesRestantesForReservationUpdate($conn, (int) $slot['salle_creneaux_id'], (int) $editReservationId)
                 : getPlacesRestantes($conn, (int) $slot['salle_creneaux_id']);
@@ -231,6 +247,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($formAction === 'update_reservation') {
+            // Mode modification : on met à jour la réservation existante au lieu de créer un compte.
             $slot = array_values($requestedSlots)[0];
             $visiteurId = (int) $_SESSION['visiteur_id'];
 
@@ -266,9 +283,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
+        // Mode création : visiteur + réservations doivent être enregistrés ensemble.
         $conn->beginTransaction();
 
         try {
+            // Création du compte visiteur avec l'email comme identifiant.
             $visiteurId = (int) createVisiteur(
                 $conn,
                 $nom,
@@ -281,6 +300,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $createdReservations = [];
             foreach ($requestedSlots as $slot) {
+                // On crée une réservation par créneau demandé.
                 $reservationId = createReservation(
                     $conn,
                     $visiteurId,
@@ -296,8 +316,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ];
             }
 
+            // Si tout est bon, on valide les INSERT dans la BDD.
             $conn->commit();
         } catch (Throwable $exception) {
+            // En cas d'erreur, on annule aussi le visiteur déjà créé dans la transaction.
             $conn->rollBack();
             throw $exception;
         }
@@ -310,7 +332,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Envoi de l'email de confirmation.
+        // Envoi de l'email de confirmation. Si l'email échoue, la réservation reste enregistrée.
         $emailSent = sendConfirmationEmail(
             $prenom,
             $nom,
@@ -319,11 +341,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $roomCatalog
         );
 
+        // Ces informations servent à la page confirmation.php juste après la redirection.
         $_SESSION['latest_reservation_ids'] = array_column($createdReservations, 'id');
         $_SESSION['latest_confirmation_visitor'] = trim($prenom . ' ' . $nom);
         $_SESSION['latest_confirmation_contact'] = $contact;
         $_SESSION['latest_confirmation_email_sent'] = $emailSent;
 
+        // Redirection après POST pour éviter de renvoyer le formulaire si on recharge la page.
         header('Location: confirmation.php');
         exit;
     } catch (Throwable $exception) {

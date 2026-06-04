@@ -4,6 +4,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Petite fonction de sécurité utilisée dans les templates.
+// Elle évite qu'un texte venant de la BDD puisse être interprété comme du HTML.
 if (!function_exists('e')) {
     function e(string $value): string
     {
@@ -11,12 +13,18 @@ if (!function_exists('e')) {
     }
 }
 
+// Valeurs par défaut : chaque page peut les modifier avant d'inclure le header.
 $pageTitle = $pageTitle ?? 'e-llusion - Exposition MMI';
 $activePage = $activePage ?? '';
 $bodyClass = $bodyClass ?? '';
 $reserveHref = $reserveHref ?? 'reservation.php';
 $extraScripts = $extraScripts ?? [];
+
+// Le filemtime ajoute une version automatique au CSS.
+// Comme ça, le navigateur recharge le style après une modification au lieu de garder l'ancien cache.
 $cssVersion = filemtime(__DIR__ . '/../assets/css/style.css');
+
+// Navigation commune à toutes les pages publiques.
 $navLinks = $navLinks ?? [
     ['key' => 'accueil', 'label' => 'Accueil', 'href' => 'index.php'],
     ['key' => 'salles', 'label' => 'Salles', 'href' => 'index.php#salles'],
@@ -25,6 +33,7 @@ $navLinks = $navLinks ?? [
 
 $currentRole = (string) ($_SESSION['auth_role'] ?? '');
 
+// Le lien Admin n'est ajouté que si la session indique un compte administrateur.
 if ($currentRole === 'admin') {
     $navLinks[] = ['key' => 'admin', 'label' => 'Admin', 'href' => 'admin.php'];
 }
@@ -40,6 +49,8 @@ if ($currentRole === 'admin') {
     <link rel="stylesheet" href="assets/css/style.css?v=<?= e((string) $cssVersion); ?>">
     <?php foreach ($extraScripts as $script): ?>
         <?php
+            // Chaque page peut demander ses scripts JS dans $extraScripts.
+            // On applique le même système de version que pour le CSS.
             $scriptPath = __DIR__ . '/../' . $script;
             $scriptVersion = file_exists($scriptPath) ? filemtime($scriptPath) : time();
         ?>

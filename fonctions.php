@@ -12,6 +12,7 @@ require_once __DIR__ . '/connexion.php';
 
 function getSalles(PDO $conn): array
 {
+    // Récupère les salles dans l'ordre réel de visite pour garder un affichage cohérent.
     $req = $conn->prepare('SELECT * FROM salles ORDER BY numero_salle ASC');
     $req->execute();
 
@@ -20,6 +21,7 @@ function getSalles(PDO $conn): array
 
 function getSalleById(PDO $conn, int $id): ?array
 {
+    // Le paramètre :id évite d'injecter directement une valeur dans la requête SQL.
     $req = $conn->prepare('SELECT * FROM salles WHERE id = :id');
     $req->execute([':id' => $id]);
     $salle = $req->fetch();
@@ -33,6 +35,7 @@ function getSalleById(PDO $conn, int $id): ?array
 
 function getCreneaux(PDO $conn): array
 {
+    // On joint les créneaux avec leur jour pour afficher une date lisible côté interface.
     $req = $conn->prepare("
         SELECT c.id, c.heure_debut, j.date_jour, j.nom_jour
         FROM creneaux c
@@ -46,6 +49,8 @@ function getCreneaux(PDO $conn): array
 
 function getAdminSlots(PDO $conn): array
 {
+    // Cette requête fournit toutes les combinaisons salle + créneau.
+    // Elle sert au formulaire de réservation et au formulaire d'édition admin.
     $req = $conn->prepare("
         SELECT
             sc.id AS salle_creneaux_id,
@@ -75,6 +80,7 @@ function getAdminSlots(PDO $conn): array
 
 function getPlacesRestantes(PDO $conn, int $salleCreneauxId): int
 {
+    // On commence par retrouver la capacité maximale du créneau demandé.
     $req = $conn->prepare('SELECT capacite_max FROM salle_creneaux WHERE id = :id');
     $req->execute([':id' => $salleCreneauxId]);
     $slot = $req->fetch();
@@ -83,15 +89,19 @@ function getPlacesRestantes(PDO $conn, int $salleCreneauxId): int
         return 0;
     }
 
+    // COALESCE transforme NULL en 0 quand aucune réservation n'existe encore.
     $req2 = $conn->prepare('SELECT COALESCE(SUM(nombre_personnes), 0) AS nb FROM reservation WHERE salle_creneaux_id = :id');
     $req2->execute([':id' => $salleCreneauxId]);
     $nbReservations = (int) $req2->fetch()['nb'];
 
+    // max(0, ...) évite d'afficher une valeur négative si un créneau est complet.
     return max(0, (int) $slot['capacite_max'] - $nbReservations);
 }
 
 function getAdminAvailability(PDO $conn): array
 {
+    // Vue globale pour le tableau d'administration : une ligne par salle et par horaire.
+    // Le LEFT JOIN garde les créneaux visibles même s'ils n'ont aucune réservation.
     $req = $conn->prepare("
         SELECT
             sc.id AS salle_creneaux_id,
@@ -119,6 +129,7 @@ function getAdminAvailability(PDO $conn): array
 
     $availability = [];
     foreach ($req->fetchAll() as $row) {
+        // On calcule les places restantes en PHP pour envoyer directement une donnée prête à afficher.
         $reservedCount = (int) $row['reserved_count'];
         $capacity = (int) $row['capacite_max'];
         $row['remaining_places'] = max(0, $capacity - $reservedCount);
@@ -142,16 +153,20 @@ function createVisiteur(
     int $participeBuffet = 0,
     string $motDePasse = ''
 ): string {
+    // L'email devient l'identifiant du visiteur, donc on le normalise en minuscules.
     $moyenComm = strtolower(trim($moyenComm));
 
+    // La validation est refaite côté serveur, même si le champ HTML est déjà en type email.
     if (!filter_var($moyenComm, FILTER_VALIDATE_EMAIL)) {
         throw new RuntimeException('Renseignez une adresse email valide.');
     }
 
+    // Empêche de créer deux comptes avec le même email ou un email identique à un login admin.
     if (identifierAlreadyUsed($conn, $moyenComm)) {
         throw new RuntimeException('Cet email est déjà utilisé.');
     }
 
+    // Création du visiteur avant les réservations : les réservations utilisent ensuite son id.
     $req = $conn->prepare("
         INSERT INTO visiteurs (nom, prenom, moyen_comm, categories_visiteur_id, participe_buffet, mdp)
         VALUES (:nom, :prenom, :moyen_comm, :categorie_id, :participe_buffet, :mdp)
@@ -174,12 +189,15 @@ function passwordCorresponds(string $motDePasseSaisi, string $motDePasseStocke):
         return false;
     }
 
+    // Si le mot de passe est hashé avec password_hash, PHP sait reconnaître l'algorithme.
     $hashInfo = password_get_info($motDePasseStocke);
 
     if (($hashInfo['algo'] ?? 0) !== 0) {
         return password_verify($motDePasseSaisi, $motDePasseStocke);
     }
 
+    // Compatibilité avec les comptes de test créés en clair dans la BDD.
+    // hash_equals évite une comparaison fragile caractère par caractère.
     return hash_equals($motDePasseStocke, $motDePasseSaisi);
 }
 
@@ -191,6 +209,7 @@ function identifierAlreadyUsed(PDO $conn, string $identifier, ?int $excludeVisit
         return false;
     }
 
+    // On vérifie d'abord dans la table admin pour éviter qu'un visiteur prenne un login admin.
     $adminReq = $conn->prepare('SELECT COUNT(*) AS total FROM admin WHERE login = :identifier');
     $adminReq->execute([':identifier' => $identifier]);
 
@@ -198,6 +217,7 @@ function identifierAlreadyUsed(PDO $conn, string $identifier, ?int $excludeVisit
         return true;
     }
 
+    // La partie visiteur accepte une exclusion lors d'une modification de compte.
     $visitorSql = 'SELECT COUNT(*) AS total FROM visiteurs WHERE moyen_comm = :identifier';
     $params = [':identifier' => $identifier];
 
@@ -214,6 +234,7 @@ function identifierAlreadyUsed(PDO $conn, string $identifier, ?int $excludeVisit
 
 function startUserSession(): void
 {
+    // On centralise le démarrage de session pour éviter d'appeler session_start plusieurs fois.
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
@@ -222,8 +243,10 @@ function startUserSession(): void
 function connectAdminSession(array $admin): void
 {
     startUserSession();
+    // Changer l'id de session après connexion limite les risques de session fixation.
     session_regenerate_id(true);
 
+    // Une seule variable auth_role permet de savoir quel type d'utilisateur est connecté.
     $_SESSION['auth_role'] = 'admin';
     $_SESSION['admin_id'] = (int) $admin['id'];
     $_SESSION['admin_login'] = (string) $admin['login'];
@@ -240,6 +263,7 @@ function connectVisitorSession(array $visiteur): void
     startUserSession();
     session_regenerate_id(true);
 
+    // Le visiteur garde seulement les infos nécessaires pour retrouver ses réservations.
     $_SESSION['auth_role'] = 'visiteur';
     $_SESSION['visiteur_id'] = (int) $visiteur['id'];
     $_SESSION['visiteur_nom'] = trim((string) ($visiteur['prenom'] ?? '') . ' ' . (string) ($visiteur['nom'] ?? ''));
@@ -269,6 +293,7 @@ function isVisitorConnected(): bool
 
 function requireAdminSession(): void
 {
+    // Protection simple des pages admin : sans session admin, retour vers la page de connexion.
     if (isAdminConnected()) {
         return;
     }
@@ -279,6 +304,7 @@ function requireAdminSession(): void
 
 function getAdminByLogin(PDO $conn, string $login): ?array
 {
+    // LIMIT 1 suffit car un login admin doit être unique.
     $req = $conn->prepare('SELECT id, login, password_hash FROM admin WHERE login = :login LIMIT 1');
     $req->execute([':login' => $login]);
     $admin = $req->fetch();
@@ -288,6 +314,7 @@ function getAdminByLogin(PDO $conn, string $login): ?array
 
 function getVisitorByCredentials(PDO $conn, string $contact, string $motDePasse): ?array
 {
+    // On récupère les comptes avec cet email, puis on vérifie le mot de passe en PHP.
     $req = $conn->prepare('SELECT * FROM visiteurs WHERE moyen_comm = :contact ORDER BY id DESC');
     $req->execute([':contact' => $contact]);
 
@@ -302,6 +329,8 @@ function getVisitorByCredentials(PDO $conn, string $contact, string $motDePasse)
 
 function getReservationDetailsByVisitorId(PDO $conn, int $visiteurId): array
 {
+    // Détail complet des réservations d'un visiteur connecté.
+    // Les JOIN évitent de faire plusieurs requêtes séparées pour la salle, le jour et l'horaire.
     $req = $conn->prepare("
         SELECT
             r.id AS reservation_id,
@@ -332,6 +361,8 @@ function getReservationDetailsByVisitorId(PDO $conn, int $visiteurId): array
 
 function getReservationDetailsForVisitor(PDO $conn, int $reservationId, int $visiteurId): ?array
 {
+    // Même logique que la fonction précédente, mais avec une protection d'appartenance.
+    // Un visiteur ne peut pas modifier une réservation qui ne lui appartient pas.
     $req = $conn->prepare("
         SELECT
             r.id AS reservation_id,
@@ -370,6 +401,7 @@ function getReservationDetailsForVisitor(PDO $conn, int $reservationId, int $vis
 
 function createReservation(PDO $conn, int $visiteursId, int $salleCreneauxId, int $nombrePersonnes = 1): string
 {
+    // Une réservation relie un visiteur à une combinaison salle + créneau.
     $req = $conn->prepare("
         INSERT INTO reservation (visiteurs_id, salle_creneaux_id, nombre_personnes)
         VALUES (:visiteurs_id, :salle_creneaux_id, :nombre_personnes)
@@ -385,8 +417,10 @@ function createReservation(PDO $conn, int $visiteursId, int $salleCreneauxId, in
 
 function getSalleCreneauxIdBySelection(PDO $conn, string $dayKey, string $time, string $roomNumber): ?int
 {
+    // Les heures du formulaire sont en HH:MM, alors que MySQL stocke souvent HH:MM:SS.
     $timeWithSeconds = strlen($time) === 5 ? $time . ':00' : $time;
 
+    // On traduit le choix utilisateur en id de salle_creneaux, utilisé ensuite par la table reservation.
     $req = $conn->prepare("
         SELECT sc.id
         FROM salle_creneaux sc
@@ -410,6 +444,7 @@ function getSalleCreneauxIdBySelection(PDO $conn, string $dayKey, string $time, 
 
 function getPlacesRestantesForReservationUpdate(PDO $conn, int $salleCreneauxId, int $reservationId): int
 {
+    // En modification, on ignore la réservation en cours pour ne pas compter deux fois ses places.
     $req = $conn->prepare("
         SELECT
             sc.capacite_max,
@@ -486,6 +521,7 @@ function getReservationDetailsById(PDO $conn, int $reservationId): ?array
 
 function updateReservation(PDO $conn, int $reservationId, int $nouveauSalleCreneauxId): void
 {
+    // Fonction simple conservée pour déplacer uniquement le créneau d'une réservation.
     $req = $conn->prepare("
         UPDATE reservation
         SET salle_creneaux_id = :nouveau_id
@@ -504,6 +540,7 @@ function cancelReservation(PDO $conn, int $reservationId): void
 
 function deleteVisitorReservation(PDO $conn, int $reservationId, int $visiteurId): bool
 {
+    // Suppression côté visiteur : la condition visiteurs_id sécurise l'action.
     $req = $conn->prepare("
         DELETE FROM reservation
         WHERE id = :reservation_id
@@ -523,6 +560,7 @@ function deleteVisitorReservation(PDO $conn, int $reservationId, int $visiteurId
 
 function getAdminCategories(PDO $conn): array
 {
+    // Alimente les menus déroulants "Qui êtes-vous ?" côté inscription et admin.
     $req = $conn->prepare('SELECT id, libelle FROM categories_visiteur ORDER BY id ASC');
     $req->execute();
 
@@ -531,6 +569,7 @@ function getAdminCategories(PDO $conn): array
 
 function getAdminReservations(PDO $conn, string $query = ''): array
 {
+    // Requête principale du CRUD admin : elle rassemble réservation, visiteur, catégorie, salle et horaire.
     $sql = "
         SELECT
             r.id AS reservation_id,
@@ -559,6 +598,7 @@ function getAdminReservations(PDO $conn, string $query = ''): array
 
     $params = [];
     if ($query !== '') {
+        // Le filtre admin cherche dans plusieurs colonnes pour retrouver rapidement une inscription.
         $like = '%' . $query . '%';
         $sql .= "
             WHERE
@@ -597,6 +637,7 @@ function updateAdminReservation(
     int $participeBuffet,
     int $nombrePersonnes = 1
 ): void {
+    // Même côté admin, l'email reste l'identifiant du visiteur.
     $moyenComm = strtolower(trim($moyenComm));
 
     if (!filter_var($moyenComm, FILTER_VALIDATE_EMAIL)) {
@@ -607,9 +648,12 @@ function updateAdminReservation(
         throw new RuntimeException('Cet email est déjà utilisé par un autre compte.');
     }
 
+    // Transaction : soit les infos visiteur et la réservation sont mises à jour ensemble,
+    // soit rien n'est enregistré si une erreur arrive au milieu.
     $conn->beginTransaction();
 
     try {
+        // Première mise à jour : identité, email, catégorie et présence au buffet.
         $reqVisiteur = $conn->prepare("
             UPDATE visiteurs
             SET
@@ -629,6 +673,7 @@ function updateAdminReservation(
             ':visiteur_id' => $visiteurId,
         ]);
 
+        // Deuxième mise à jour : choix de salle/créneau et nombre de personnes.
         $reqReservation = $conn->prepare("
             UPDATE reservation
             SET
@@ -652,9 +697,11 @@ function updateAdminReservation(
 
 function deleteAdminReservation(PDO $conn, int $reservationId): void
 {
+    // Suppression admin : on retire d'abord la réservation puis éventuellement le visiteur.
     $conn->beginTransaction();
 
     try {
+        // On retrouve le visiteur lié avant suppression pour savoir s'il a encore d'autres réservations.
         $reqFind = $conn->prepare('SELECT visiteurs_id FROM reservation WHERE id = :id');
         $reqFind->execute([':id' => $reservationId]);
         $reservation = $reqFind->fetch();
@@ -666,6 +713,7 @@ function deleteAdminReservation(PDO $conn, int $reservationId): void
 
         $visiteurId = (int) $reservation['visiteurs_id'];
 
+        // La réservation est supprimée en premier car elle dépend du visiteur.
         $reqDeleteReservation = $conn->prepare('DELETE FROM reservation WHERE id = :id');
         $reqDeleteReservation->execute([':id' => $reservationId]);
 
@@ -673,6 +721,7 @@ function deleteAdminReservation(PDO $conn, int $reservationId): void
         $reqCount->execute([':visiteur_id' => $visiteurId]);
         $remainingReservations = (int) $reqCount->fetch()['total'];
 
+        // Si le visiteur n'a plus aucune réservation, son compte est supprimé aussi.
         if ($remainingReservations === 0) {
             $reqDeleteVisiteur = $conn->prepare('DELETE FROM visiteurs WHERE id = :id');
             $reqDeleteVisiteur->execute([':id' => $visiteurId]);
@@ -706,6 +755,7 @@ function sendConfirmationEmail(
     array $reservations,
     array $roomCatalog = []
 ): bool {
+    // Raccourci utilisé après une création de réservation.
     return sendReservationNotificationEmail('created', $prenom, $nom, $contact, $reservations, $roomCatalog);
 }
 
@@ -717,15 +767,18 @@ function sendReservationNotificationEmail(
     array $reservations,
     array $roomCatalog = []
 ): bool {
+    // Le site envoie un email seulement si le contact est bien une adresse email.
     $email = extractEmailFromContact($contact);
 
     if ($email === '' || !mailConfigurationIsReady()) {
         return false;
     }
 
+    // L'expéditeur doit correspondre au domaine du serveur pour éviter les blocages Gmail.
     $fromAddress = getMailFromAddress();
     $replyToAddress = getMailReplyToAddress($fromAddress);
 
+    // Les en-têtes déclarent un email HTML encodé en UTF-8.
     $subject = encodeMailHeader(reservationEmailSubject($type));
     $body = buildReservationEmailBody($type, $prenom, $nom, $reservations, $roomCatalog);
     $headers = [
@@ -741,6 +794,7 @@ function sendReservationNotificationEmail(
 
 function mailConfigurationIsReady(): bool
 {
+    // Si l'envoi est désactivé dans config.php, on sort sans provoquer d'erreur utilisateur.
     if (!defined('MAIL_ENABLED') || !MAIL_ENABLED) {
         return false;
     }
@@ -761,6 +815,7 @@ function mailConfigurationIsReady(): bool
 
 function getMailFromAddress(): string
 {
+    // On évite d'utiliser directement une adresse Gmail en From sur un hébergement qui n'est pas Gmail.
     $configuredAddress = defined('MAIL_FROM_ADDRESS') ? trim((string) MAIL_FROM_ADDRESS) : '';
 
     if ($configuredAddress !== '' && !mailAddressUsesExternalProvider($configuredAddress)) {
@@ -770,6 +825,7 @@ function getMailFromAddress(): string
     $serverName = $_SERVER['SERVER_NAME'] ?? '';
     $serverName = strtolower(trim(explode(':', $serverName)[0]));
 
+    // Sur un vrai domaine, no-reply@domaine est souvent mieux accepté par les serveurs mail.
     if ($serverName !== '' && $serverName !== 'localhost' && strpos($serverName, '.') !== false) {
         return 'no-reply@' . $serverName;
     }
@@ -779,6 +835,7 @@ function getMailFromAddress(): string
 
 function getMailReplyToAddress(string $fallbackAddress): string
 {
+    // Reply-To peut être une adresse personnelle, même si From doit rester lié au domaine.
     $replyToAddress = defined('MAIL_REPLY_TO_ADDRESS') ? trim((string) MAIL_REPLY_TO_ADDRESS) : '';
 
     if (filter_var($replyToAddress, FILTER_VALIDATE_EMAIL)) {
@@ -790,6 +847,7 @@ function getMailReplyToAddress(string $fallbackAddress): string
 
 function mailAddressUsesExternalProvider(string $email): bool
 {
+    // Liste simple des fournisseurs qui refusent souvent d'être utilisés comme expéditeur direct.
     $domain = strtolower(substr(strrchr($email, '@') ?: '', 1));
 
     return in_array($domain, ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com'], true);
@@ -802,6 +860,7 @@ function encodeMailHeader(string $value): string
 
 function extractEmailFromContact(string $contact): string
 {
+    // Depuis que le formulaire demande uniquement un email, cette vérification reste une sécurité.
     $contact = trim($contact);
 
     if (filter_var($contact, FILTER_VALIDATE_EMAIL)) {
@@ -813,6 +872,7 @@ function extractEmailFromContact(string $contact): string
 
 function reservationEmailSubject(string $type): string
 {
+    // Sujet différent selon l'action réalisée sur la réservation.
     switch ($type) {
         case 'updated':
             return 'Votre réservation e-llusion a été modifiée';
@@ -837,6 +897,7 @@ function reservationEmailTitle(string $type): string
 
 function reservationEmailIntro(string $type): string
 {
+    // Phrase d'introduction affichée dans le corps du mail.
     switch ($type) {
         case 'updated':
             return 'Votre réservation pour l’exposition e-llusion vient d’être modifiée. Voici le nouveau récapitulatif.';
@@ -865,6 +926,7 @@ function buildReservationEmailBody(
     array $reservations,
     array $roomCatalog = []
 ): string {
+    // Le mail est construit en HTML simple, avec du style inline pour être compatible avec Gmail.
     $title = reservationEmailTitle($type);
     $intro = reservationEmailIntro($type);
     $statusColor = reservationEmailStatusColor($type);
@@ -882,6 +944,7 @@ function buildReservationEmailBody(
     $body .= '<div style="padding:26px 30px;">';
     $body .= '<table style="width:100%; border-collapse:separate; border-spacing:0 12px;">';
 
+    // Une même personne peut avoir plusieurs réservations, donc on crée un bloc par réservation.
     foreach ($reservations as $reservation) {
         $body .= '<tr>';
         $body .= '<td style="padding:18px; background:#071114; border:1px solid rgba(60,232,215,.55); border-radius:14px;">';
@@ -920,6 +983,7 @@ function buildReservationEmailText(
     array $reservations,
     array $roomCatalog = []
 ): string {
+    // Version texte utile pour expliquer le contenu sans dépendre du HTML.
     $lines = [
         reservationEmailTitle($type),
         '',
@@ -943,6 +1007,7 @@ function buildReservationEmailText(
 
 function reservationEmailIdLabel(array $reservation): string
 {
+    // Accepte les deux noms possibles selon l'origine du tableau : reservation_id ou id.
     $id = $reservation['reservation_id'] ?? $reservation['id'] ?? null;
 
     return $id ? 'Réservation #' . $id : 'Récapitulatif';
@@ -950,6 +1015,7 @@ function reservationEmailIdLabel(array $reservation): string
 
 function reservationEmailRoomLabel(array $reservation, array $roomCatalog = []): string
 {
+    // Si la requête SQL ne fournit pas le nom de la salle, on le retrouve dans le catalogue local.
     $roomNumber = (string) ($reservation['numero_salle'] ?? $reservation['room'] ?? '');
     $roomName = (string) ($reservation['nom_salle'] ?? '');
 
@@ -962,6 +1028,7 @@ function reservationEmailRoomLabel(array $reservation, array $roomCatalog = []):
 
 function reservationEmailDateLabel(array $reservation): string
 {
+    // Formate la date BDD YYYY-MM-DD en date plus lisible pour le visiteur.
     $date = (string) ($reservation['date_jour'] ?? '');
     $dayName = (string) ($reservation['nom_jour'] ?? $reservation['day'] ?? '');
 

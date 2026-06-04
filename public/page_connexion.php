@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../fonctions.php';
 
+// La page connexion sert à deux profils : visiteurs et administrateurs.
 startUserSession();
 
 function formatReservationDate(string $value): string
 {
+    // Affichage court dans le récapitulatif visiteur.
     $date = DateTimeImmutable::createFromFormat('Y-m-d', $value);
 
     return $date ? $date->format('d/m/Y') : $value;
@@ -15,6 +17,7 @@ function formatReservationDate(string $value): string
 
 function formatReservationTime(string $value): string
 {
+    // Même format horaire que sur le reste du site.
     $time = DateTimeImmutable::createFromFormat('H:i:s', $value);
 
     return $time ? $time->format('H:i') : substr($value, 0, 5);
@@ -38,19 +41,23 @@ $deletedReservationId = filter_input(INPUT_GET, 'deleted', FILTER_VALIDATE_INT);
 $updatedReservationId = filter_input(INPUT_GET, 'updated', FILTER_VALIDATE_INT);
 
 if ($deletedReservationId) {
+    // Message affiché après une suppression réussie et une redirection GET.
     $lookupMessage = 'La réservation #' . $deletedReservationId . ' a été supprimée.';
 }
 
 if ($updatedReservationId) {
+    // Message affiché après une modification réussie depuis reservation.php.
     $lookupMessage = 'La réservation #' . $updatedReservationId . ' a été modifiée.';
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' && !$accessDenied && isAdminConnected()) {
+    // Un admin déjà connecté est directement renvoyé vers son tableau de bord.
     header('Location: admin.php');
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $postedAction === 'delete_reservation') {
+    // Suppression côté visiteur depuis son espace personnel.
     $lookupAttempted = true;
     $connectedVisitor = isVisitorConnected() ? ['id' => (int) $_SESSION['visiteur_id']] : null;
     $reservationId = filter_input(INPUT_POST, 'reservation_id', FILTER_VALIDATE_INT);
@@ -58,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $postedAction === 'delete_reservati
         ? getReservationDetailsForVisitor($conn, $reservationId, (int) $_SESSION['visiteur_id'])
         : null;
 
+    // On vérifie que la réservation appartient bien au visiteur connecté.
     if (!$connectedVisitor) {
         $lookupError = 'Reconnectez-vous avant de supprimer une réservation.';
     } elseif (!$reservationId) {
@@ -79,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $postedAction === 'delete_reservati
         exit;
     }
 } elseif ($_SERVER['REQUEST_METHOD'] !== 'POST' && !$accessDenied && isVisitorConnected()) {
+    // Si le visiteur est déjà connecté, on affiche directement ses réservations.
     $connectedVisitor = ['id' => (int) $_SESSION['visiteur_id']];
     $reservationResults = getReservationDetailsByVisitorId($conn, (int) $_SESSION['visiteur_id']);
     $lookupAttempted = true;
@@ -87,6 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $postedAction === 'delete_reservati
         $lookupError = 'Votre compte existe, mais aucune réservation n’est associée.';
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Connexion classique : le même formulaire peut recevoir un email visiteur ou un login admin.
     $lookupAttempted = true;
     $enteredContact = trim((string) ($_POST['contact_value'] ?? ''));
     $enteredPassword = trim((string) ($_POST['password'] ?? ''));
@@ -94,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $postedAction === 'delete_reservati
     if ($enteredContact === '' || $enteredPassword === '') {
         $lookupError = 'Renseignez votre email ou votre login admin, puis votre mot de passe.';
     } else {
+        // On teste d'abord la table admin, car un admin n'utilise pas forcément un email.
         $admin = getAdminByLogin($conn, $enteredContact);
 
         if ($admin && passwordCorresponds($enteredPassword, (string) $admin['password_hash'])) {
@@ -102,6 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $postedAction === 'delete_reservati
             exit;
         }
 
+        // Si ce n'est pas un admin valide, on cherche un visiteur avec email + mot de passe.
         $connectedVisitor = getVisitorByCredentials($conn, $enteredContact, $enteredPassword);
 
         if (!$connectedVisitor) {
@@ -147,6 +159,7 @@ require __DIR__ . '/includes/header.php';
                     <?php endif; ?>
 
                     <?php if (!isVisitorConnected() && !isAdminConnected()): ?>
+                    <!-- Formulaire unique : il connecte soit un visiteur, soit un administrateur. -->
                     <form class="auth-form" method="post" action="page_connexion.php">
                         <label class="auth-field">
                             <span>Email ou login admin</span>
@@ -233,6 +246,7 @@ require __DIR__ . '/includes/header.php';
                                         >
                                             Modifier
                                         </a>
+                                        <!-- Suppression visiteur : l'id est caché, la vérification d'appartenance reste faite en PHP. -->
                                         <form method="post" action="page_connexion.php">
                                             <input type="hidden" name="action" value="delete_reservation">
                                             <input

@@ -6,10 +6,12 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// La confirmation lit les ids stockés en session juste après l'inscription.
 require_once __DIR__ . '/../fonctions.php';
 
 function confirmationFormatDate(string $value): string
 {
+    // Transforme la date SQL en format plus agréable pour le récapitulatif.
     $date = DateTimeImmutable::createFromFormat('Y-m-d', $value);
 
     if (!$date) {
@@ -36,6 +38,7 @@ function confirmationFormatDate(string $value): string
 
 function confirmationFormatTime(string $value): string
 {
+    // Affiche seulement heure:minute dans la carte de confirmation.
     $time = DateTimeImmutable::createFromFormat('H:i:s', $value);
 
     return $time ? $time->format('H:i') : substr($value, 0, 5);
@@ -48,6 +51,7 @@ $emailSent = (bool) ($_SESSION['latest_confirmation_email_sent'] ?? false);
 $reservations = [];
 
 if (is_array($reservationIds)) {
+    // On recharge les réservations depuis la BDD pour afficher des données fiables.
     foreach ($reservationIds as $reservationId) {
         $reservationId = filter_var($reservationId, FILTER_VALIDATE_INT);
 
@@ -84,6 +88,7 @@ require __DIR__ . '/includes/header.php';
         <section class="confirmation-section" aria-label="Récapitulatif de réservation">
             <?php if ($reservations): ?>
                 <article class="confirmation-card">
+                    <!-- Carte récapitulative affichée après une réservation réussie. -->
                     <div class="confirmation-card-header">
                         <div>
                             <h2>Récapitulatif</h2>

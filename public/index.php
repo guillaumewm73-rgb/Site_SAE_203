@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+// Images du carrousel de la page d'accueil.
+// Chaque image a un texte alternatif pour rester correcte côté accessibilité.
 $slides = [
     [
         'image' => 'assets/images/carousel-expo-1.jpg',
@@ -23,6 +25,8 @@ $slides = [
 
 require __DIR__ . '/includes/donnee_salles.php';
 
+// Les horaires sont affichés à titre informatif sur l'accueil.
+// Le choix réel se fait ensuite dans le formulaire de réservation.
 $days = [
     [
         'label' => 'Jeudi',
@@ -38,6 +42,7 @@ $days = [
 
 $rooms = getHomeRoomCards();
 
+// Variables utilisées par le header commun.
 $pageTitle = 'e-llusion - Exposition MMI';
 $activePage = 'accueil';
 $reserveHref = 'reservation.php';
@@ -51,6 +56,7 @@ require __DIR__ . '/includes/header.php';
             <div class="hero-frame">
                 <div class="carousel" data-carousel>
                     <?php foreach ($slides as $index => $slide): ?>
+                        <!-- Une seule image reçoit is-visible au départ ; le JS change ensuite la slide visible. -->
                         <img
                             class="carousel-slide <?= $index === 0 ? 'is-visible' : ''; ?>"
                             src="<?= e($slide['image']); ?>"
@@ -72,6 +78,7 @@ require __DIR__ . '/includes/header.php';
 
                 <div class="carousel-dots" aria-label="Navigation du carrousel">
                     <?php foreach ($slides as $index => $slide): ?>
+                        <!-- Les points restent des boutons car ils contrôlent vraiment le carrousel. -->
                         <button
                             class="<?= $index === 0 ? 'is-active' : ''; ?>"
                             type="button"
@@ -91,6 +98,7 @@ require __DIR__ . '/includes/header.php';
 
             <div class="room-grid">
                 <?php foreach ($rooms as $room): ?>
+                    <!-- Carte salle : lien vers la page détaillée de la salle. -->
                     <article class="room-card">
                         <div class="room-title">
                             <span class="red-dot"></span>
@@ -118,6 +126,7 @@ require __DIR__ . '/includes/header.php';
 
             <div class="day-grid">
                 <?php foreach ($days as $day): ?>
+                    <!-- Carte informative : les horaires ne sont pas cliquables pour éviter une fausse affordance. -->
                     <article class="day-card">
                         <h3><?= e($day['label']); ?></h3>
                         <p><?= e($day['date']); ?></p>

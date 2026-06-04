@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../fonctions.php';
 
+// Bloque l'accès direct à l'interface si la session n'est pas administratrice.
 requireAdminSession();
 
 $pageTitle = 'Administration - e-llusion';
@@ -14,6 +15,7 @@ $extraScripts = ['assets/js/admin.js'];
 
 function adminFormatDate(string $date, ?string $dayName = null): string
 {
+    // Format d'affichage utilisé dans les tableaux admin.
     $months = [
         '01' => 'janvier',
         '02' => 'février',
@@ -43,6 +45,7 @@ function adminFormatDate(string $date, ?string $dayName = null): string
 
 function adminFormatShortDay(string $date, ?string $dayName = null): string
 {
+    // Version courte pour les lignes de réservation, par exemple J18 ou V19.
     $parsedDate = DateTimeImmutable::createFromFormat('Y-m-d', $date);
     $prefix = $dayName ? substr($dayName, 0, 1) : 'J';
 
@@ -51,6 +54,7 @@ function adminFormatShortDay(string $date, ?string $dayName = null): string
 
 function adminFormatTime(string $time): string
 {
+    // Même principe que côté réservation : on retire les secondes pour l'affichage.
     $parsedTime = DateTimeImmutable::createFromFormat('H:i:s', $time);
 
     return $parsedTime ? $parsedTime->format('H:i') : substr($time, 0, 5);
@@ -58,6 +62,7 @@ function adminFormatTime(string $time): string
 
 function adminBoolValue(mixed $value): int
 {
+    // Normalise les valeurs buffet, car elles peuvent venir de MySQL ou du formulaire.
     $normalized = trim((string) $value, "\0 \t\n\r");
 
     return in_array($normalized, ['1', 'oui', 'yes', 'true'], true) ? 1 : 0;
@@ -65,11 +70,13 @@ function adminBoolValue(mixed $value): int
 
 function exportAdminReservationsCsv(array $reservations): never
 {
+    // Export demandé dans le cahier des charges : fichier CSV lisible dans Excel/LibreOffice.
     $filename = 'reservation-e-llusion-' . date('Y-m-d') . '.csv';
 
     header('Content-Type: text/csv; charset=UTF-8');
     header('Content-Disposition: attachment; filename="' . $filename . '"');
 
+    // BOM UTF-8 pour que les accents s'affichent correctement dans Excel.
     echo "\xEF\xBB\xBF";
 
     $output = fopen('php://output', 'w');
@@ -112,6 +119,7 @@ function exportAdminReservationsCsv(array $reservations): never
 
 function redirectAdmin(string $status, string $search, string $day): never
 {
+    // Redirection après une action POST pour éviter une double modification au rechargement.
     $params = ['status' => $status];
 
     if ($search !== '') {
@@ -135,6 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         if ($action === 'update') {
+            // Formulaire d'édition : on récupère tous les champs nécessaires au CRUD Update.
             $reservationId = filter_input(INPUT_POST, 'reservation_id', FILTER_VALIDATE_INT);
             $visiteurId = filter_input(INPUT_POST, 'visiteur_id', FILTER_VALIDATE_INT);
             $categorieId = filter_input(INPUT_POST, 'categorie_id', FILTER_VALIDATE_INT);
@@ -161,6 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('Le nombre de personnes doit être compris entre 1 et 12.');
             }
 
+            // La fonction met à jour à la fois la table visiteurs et la table reservation.
             updateAdminReservation(
                 $conn,
                 $reservationId,
@@ -189,12 +199,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($action === 'delete') {
+            // Action Delete : on vérifie l'id puis on supprime la réservation.
             $reservationId = filter_input(INPUT_POST, 'reservation_id', FILTER_VALIDATE_INT);
 
             if (!$reservationId) {
                 throw new RuntimeException('Aucune réservation sélectionnée pour la suppression.');
             }
 
+            // On garde le détail avant suppression pour pouvoir envoyer un email récapitulatif.
             $reservationBeforeDelete = getReservationDetailsById($conn, $reservationId);
 
             deleteAdminReservation($conn, $reservationId);
@@ -221,13 +233,16 @@ $slots = getAdminSlots($conn);
 $reservations = getAdminReservations($conn, $search);
 
 if ((string) ($_GET['export'] ?? '') === 'csv') {
+    // L'export se lance avec un paramètre GET, par exemple admin.php?export=csv.
     exportAdminReservationsCsv($reservations);
 }
 
+// Données du tableau des places disponibles en temps réel.
 $availabilityRows = getAdminAvailability($conn);
 
 $availabilityDays = [];
 foreach ($availabilityRows as $row) {
+    // On regroupe les disponibilités par date pour avoir un onglet par jour.
     $date = (string) $row['date_jour'];
     $availabilityDays[$date] ??= [
         'label' => adminFormatDate($date, (string) $row['nom_jour']),
@@ -246,6 +261,7 @@ $availabilityRooms = [];
 $availabilityMatrix = [];
 
 foreach ($activeAvailability as $row) {
+    // Préparation d'une matrice [salle][heure] pour générer le tableau HTML.
     $time = adminFormatTime((string) $row['heure_debut']);
     $room = (string) $row['numero_salle'];
 
@@ -261,6 +277,7 @@ $availabilityUpdatedAt = date('H:i:s');
 
 $roomSummary = [];
 foreach ($availabilityRows as $row) {
+    // Résumé par salle : total réservé, capacité totale et créneau le plus chargé.
     $room = (string) $row['numero_salle'];
     $reservedCount = (int) $row['reserved_count'];
     $capacity = (int) $row['capacite_max'];
@@ -288,6 +305,7 @@ foreach ($availabilityRows as $row) {
 }
 
 foreach ($roomSummary as &$summary) {
+    // Pourcentage utilisé par les barres de progression de la synthèse.
     $summary['percent'] = $summary['capacity'] > 0
         ? min(100, (int) round(($summary['total'] / $summary['capacity']) * 100))
         : 0;
@@ -334,6 +352,8 @@ require __DIR__ . '/includes/header.php';
                     </p>
                 </div>
 
+                <!-- Formulaire CRUD Update/Delete : il est rempli par défaut avec la première réservation,
+                     puis le JavaScript le met à jour quand on clique sur une autre ligne. -->
                 <form class="admin-edit-form" method="post" action="admin.php" data-admin-edit-form>
                     <input type="hidden" name="reservation_id" value="<?= e((string) ($selectedReservation['reservation_id'] ?? '')); ?>">
                     <input type="hidden" name="visiteur_id" value="<?= e((string) ($selectedReservation['visiteurs_id'] ?? '')); ?>">
@@ -474,6 +494,7 @@ require __DIR__ . '/includes/header.php';
                         </div>
                     </div>
 
+                    <!-- Recherche serveur : le même champ est aussi filtré instantanément en JavaScript. -->
                     <form class="admin-search-field" method="get" action="admin.php">
                         <span>Filtrer par nom, prénom, mail, catégorie ou salle</span>
                         <input
@@ -512,6 +533,7 @@ require __DIR__ . '/includes/header.php';
                                 $isSelected = $selectedReservation
                                     && $reservationId === (int) $selectedReservation['reservation_id'];
                             ?>
+                            <!-- Les attributs data-* servent au JavaScript pour remplir le formulaire d'édition. -->
                             <article
                                 class="admin-reservation-row <?= $isSelected ? 'is-selected' : ''; ?>"
                                 data-admin-row
@@ -584,6 +606,7 @@ require __DIR__ . '/includes/header.php';
                         <?php endforeach; ?>
                     </div>
 
+                    <!-- Matrice lisible par le JS : elle sera rafraîchie automatiquement via admin_disponibilites.php. -->
                     <div
                         class="admin-matrix"
                         role="table"

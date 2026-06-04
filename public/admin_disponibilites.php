@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../fonctions.php';
 
+// Cette route JSON est appelée par admin.js pour mettre à jour le tableau sans recharger la page.
 requireAdminSession();
 
 function adminApiFormatTime(string $time): string
@@ -18,6 +19,7 @@ $availabilityRows = getAdminAvailability($conn);
 $cells = [];
 
 foreach ($availabilityRows as $row) {
+    // Si un jour est choisi dans l'admin, l'API ne renvoie que les cellules de ce jour.
     $date = (string) $row['date_jour'];
 
     if ($selectedDay !== '' && $date !== $selectedDay) {
@@ -34,6 +36,7 @@ foreach ($availabilityRows as $row) {
     ];
 }
 
+// Réponse JSON consommée par fetch().
 header('Content-Type: application/json; charset=UTF-8');
 header('Cache-Control: no-store');
 

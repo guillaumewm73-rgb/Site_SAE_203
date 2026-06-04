@@ -1,6 +1,9 @@
 const registrationDataElement = document.getElementById('registration-data');
+// Le PHP écrit les jours, salles et disponibilités dans une balise JSON cachée.
+// Le JavaScript lit ce JSON pour mettre à jour le formulaire sans recharger la page.
 const registrationData = JSON.parse(registrationDataElement.textContent);
 
+// Sélection des éléments importants du formulaire.
 const form = document.querySelector('[data-registration-form]');
 const slotList = document.querySelector('[data-slot-list]');
 const addSlotButton = document.querySelector('[data-add-slot]');
@@ -10,8 +13,10 @@ const passwordInput = document.querySelector('[data-password-input]');
 const passwordToggle = document.querySelector('[data-password-toggle]');
 
 function fillTimeOptions(timeSelect, day, currentValue) {
+    // Quand le jour change, la liste d'heures doit correspondre au jour choisi.
     const times = registrationData.days[day].times;
 
+    // On vide le select avant de recréer les options.
     timeSelect.innerHTML = '';
 
     times.forEach((time) => {
@@ -21,10 +26,13 @@ function fillTimeOptions(timeSelect, day, currentValue) {
         timeSelect.appendChild(option);
     });
 
+    // Si l'ancienne heure existe encore pour ce jour, on la garde ; sinon on prend la première.
     timeSelect.value = times.includes(currentValue) ? currentValue : times[0];
 }
 
 function updateSlotNames(slot, index) {
+    // PHP reçoit les créneaux sous forme de tableau : slots[0], slots[1], etc.
+    // Il faut donc renommer les champs après un ajout ou une suppression de créneau.
     slot.querySelector('[data-slot-day]').name = `slots[${index}][day]`;
     slot.querySelector('[data-slot-time]').name = `slots[${index}][time]`;
     slot.querySelector('[data-slot-room]').name = `slots[${index}][room]`;
@@ -32,6 +40,7 @@ function updateSlotNames(slot, index) {
 }
 
 function updateSlot(slot, index) {
+    // Mise à jour complète d'un bloc créneau : menus, titre, bouton supprimer et jauge.
     const daySelect = slot.querySelector('[data-slot-day]');
     const timeSelect = slot.querySelector('[data-slot-time]');
     const roomSelect = slot.querySelector('[data-slot-room]');
@@ -43,16 +52,19 @@ function updateSlot(slot, index) {
     fillTimeOptions(timeSelect, daySelect.value, timeSelect.value);
     updateSlotNames(slot, index);
 
+    // La clé doit être identique à celle générée en PHP dans $registrationData.
     const key = `${daySelect.value}|${timeSelect.value}|${roomSelect.value}`;
     const remainingPlaces = registrationData.availability[key] ?? 12;
     const selectedPeople = Number(peopleSelect.value);
     const placesAfterSelection = remainingPlaces - selectedPeople;
+    // La jauge est un pourcentage limité entre 0 et 100 pour éviter les débordements visuels.
     const percentage = Math.max(0, Math.min(100, (placesAfterSelection / 12) * 100));
     const room = registrationData.rooms[roomSelect.value];
 
     title.textContent = `Créneau ${index + 1}`;
     removeButton.hidden = slotList.children.length === 1;
 
+    // Classes visuelles : peu de places restantes ou créneau dépassé.
     capacity.classList.toggle('is-low', placesAfterSelection <= 3 && placesAfterSelection > 0);
     capacity.classList.toggle('is-full', placesAfterSelection < 0);
 
@@ -68,18 +80,21 @@ function updateSlot(slot, index) {
 }
 
 function updateAllSlots() {
+    // Recalcule tous les blocs, utile après chaque changement de champ.
     Array.from(slotList.children).forEach((slot, index) => {
         updateSlot(slot, index);
     });
 }
 
 slotList.addEventListener('change', (event) => {
+    // Délégation d'événement : un seul listener suffit même pour les créneaux ajoutés après coup.
     if (event.target.matches('[data-slot-day], [data-slot-time], [data-slot-room], [data-slot-people]')) {
         updateAllSlots();
     }
 });
 
 slotList.addEventListener('click', (event) => {
+    // Suppression d'un créneau ajouté par le visiteur.
     if (!event.target.matches('[data-remove-slot]')) {
         return;
     }
@@ -89,6 +104,7 @@ slotList.addEventListener('click', (event) => {
 });
 
 addSlotButton.addEventListener('click', () => {
+    // On clone le premier créneau pour garder exactement la même structure HTML.
     const newSlot = slotList.firstElementChild.cloneNode(true);
 
     newSlot.querySelector('[data-slot-day]').value = Object.keys(registrationData.days)[0];
@@ -99,6 +115,7 @@ addSlotButton.addEventListener('click', () => {
 });
 
 passwordToggle?.addEventListener('click', () => {
+    // Bouton œil : il change le type password/text sans toucher à la valeur saisie.
     if (!passwordInput) {
         return;
     }
@@ -115,6 +132,7 @@ passwordToggle?.addEventListener('click', () => {
 });
 
 form.addEventListener('submit', (event) => {
+    // Validation HTML native : required, email, min, max...
     if (!form.checkValidity()) {
         event.preventDefault();
         const firstInvalidField = form.querySelector(':invalid');
@@ -126,6 +144,8 @@ form.addEventListener('submit', (event) => {
         return;
     }
 
+    // Vérification côté interface pour prévenir l'utilisateur avant l'envoi.
+    // Le PHP refait quand même la même sécurité à la réception.
     const hasOverbookedSlot = Array.from(document.querySelectorAll('[data-slot-capacity]'))
         .some((capacity) => capacity.classList.contains('is-full'));
 
@@ -137,6 +157,7 @@ form.addEventListener('submit', (event) => {
         return;
     }
 
+    // Message de feedback pendant l'envoi du formulaire.
     const slotCount = slotList.children.length;
     const peopleCount = Array.from(document.querySelectorAll('[data-slot-people]'))
         .reduce((total, select) => total + Number(select.value), 0);
@@ -154,5 +175,6 @@ form.addEventListener('submit', (event) => {
 updateAllSlots();
 
 if (window.location.hash === '#registration-result') {
+    // Utilisé quand on revient sur le formulaire depuis le bouton Modifier.
     document.getElementById('registration-result')?.scrollIntoView({ block: 'start' });
 }

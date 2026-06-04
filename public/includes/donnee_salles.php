@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 function getRoomCatalog(): array
 {
+    // Catalogue de contenu des salles.
+    // Il complète la BDD avec les textes longs, images et descriptions utilisés sur les pages publiques.
     $sourceCatalog = [
         '021' => [
             'number' => '021',
@@ -157,6 +159,7 @@ TEXT,
         ],
     ];
 
+    // Ordre final demandé pour l'affichage du site.
   $roomOrder = [
         '001' => '001',
         '002' => '002',
@@ -164,6 +167,7 @@ TEXT,
         '021' => '021',
     ];
 
+    // Noms publics des salles affichés dans les cartes et les pages détaillées.
     $roomGroups = [
         '001' => 'La Pépinière',
         '002' => "L'Envers du Décors",
@@ -171,6 +175,7 @@ TEXT,
         '021' => 'Societ-e',
     ];  
 
+    // Libellés TP visibles dans les pages de salle.
     $roomSupportLabels = [
         '001' => 'TP 2.2 - Lotus / E-biscus / Datura / Oeuvre 4',
         '002' => 'TP 2.1 - Tapis Rouge / En Direct / AD-HD',
@@ -178,6 +183,7 @@ TEXT,
         '021' => 'TP 1.1 - Community / Distorsion',
     ];
 
+    // Contacts des référents : mailto pour les emails, tel pour le numéro de téléphone.
     $roomReferents = [
         '001' => [
             'label' => 'Référent TP 2.2',
@@ -208,6 +214,7 @@ TEXT,
     $catalog = [];
 
     foreach ($roomOrder as $number => $sourceNumber) {
+        // On reconstruit un catalogue propre en appliquant l'ordre, les noms et les référents définitifs.
         $room = $sourceCatalog[$sourceNumber];
         $room['number'] = $number;
         $room['slug'] = 'salle-' . $number . '.php';
@@ -222,11 +229,13 @@ TEXT,
 
 function getRoomNumbers(): array
 {
+    // Sert aux pages qui ont seulement besoin de connaître les numéros disponibles.
     return array_keys(getRoomCatalog());
 }
 
 function getRoomByNumber(string $number): ?array
 {
+    // Accès direct à une salle précise depuis salle-001.php, salle-002.php, etc.
     $catalog = getRoomCatalog();
 
     return $catalog[$number] ?? null;
@@ -234,6 +243,7 @@ function getRoomByNumber(string $number): ?array
 
 function getHomeRoomCards(): array
 {
+    // Version courte du catalogue pour les cartes de la page d'accueil.
     $catalog = getRoomCatalog();
 
     return [

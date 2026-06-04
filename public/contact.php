@@ -8,6 +8,7 @@ $reserveHref = 'reservation.php';
 
 require __DIR__ . '/includes/donnee_salles.php';
 
+// On réutilise le catalogue des salles pour afficher automatiquement les référents.
 $roomCatalog = getRoomCatalog();
 
 require __DIR__ . '/includes/header.php';
@@ -42,6 +43,7 @@ require __DIR__ . '/includes/header.php';
             <div class="contact-room-grid" aria-label="Référents par salle">
                 <?php foreach ($roomCatalog as $room): ?>
                     <?php $referent = $room['referent']; ?>
+                    <!-- Une carte est générée par salle à partir des données centralisées. -->
                     <article class="contact-card contact-room-card">
                         <span>Salle <?= e($room['number']); ?> · <?= e($room['supportLabel']); ?></span>
                         <h3><?= e($referent['label']); ?></h3>

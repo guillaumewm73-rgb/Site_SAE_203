@@ -672,7 +672,7 @@ Elle verifie :
 Pourquoi verifier les deux tables ?
 
 - Un visiteur ne doit pas pouvoir prendre le meme identifiant qu'un admin.
-- Deux visiteurs ne doivent pas avoir le meme email ou telephone.
+- Deux visiteurs ne doivent pas avoir le meme email
 
 ### 6.5 Fonctions de session
 
@@ -761,8 +761,6 @@ $conn->rollBack();
 Explication :
 
 - Annule tout si une erreur arrive.
-
-A l'oral :
 
 > On utilise une transaction quand plusieurs requetes doivent reussir ensemble. Par exemple, modifier un visiteur et sa reservation doit etre coherent : si une requete echoue, on annule tout.
 

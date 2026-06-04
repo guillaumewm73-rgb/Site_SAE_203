@@ -1,4 +1,5 @@
 const rows = Array.from(document.querySelectorAll('[data-admin-row]'));
+// Sélecteurs du tableau administrateur.
 const searchInput = document.querySelector('[data-admin-search]');
 const countOutput = document.querySelector('[data-admin-count]');
 const editForm = document.querySelector('[data-admin-edit-form]');
@@ -8,6 +9,7 @@ const availabilityCells = Array.from(document.querySelectorAll('[data-admin-avai
 const refreshStatus = document.querySelector('[data-admin-refresh-status]');
 
 function updateVisibleCount() {
+    // Met à jour le nombre de lignes visibles après un filtre côté navigateur.
     if (!countOutput) {
         return;
     }
@@ -17,6 +19,7 @@ function updateVisibleCount() {
 }
 
 function fillEditForm(row) {
+    // Copie les data-* de la ligne sélectionnée dans le formulaire d'édition.
     if (!editForm) {
         return;
     }
@@ -31,6 +34,7 @@ function fillEditForm(row) {
     editForm.participe_buffet.value = row.dataset.buffet || '0';
     editForm.nombre_personnes.value = row.dataset.people || '1';
 
+    // Indique visuellement quelle réservation est en cours de modification.
     rows.forEach((item) => item.classList.remove('is-selected'));
     row.classList.add('is-selected');
 
@@ -40,11 +44,13 @@ function fillEditForm(row) {
 }
 
 function applyAvailabilityData(data) {
+    // Applique les données JSON reçues depuis admin_disponibilites.php.
     if (!data || !Array.isArray(data.cells)) {
         return;
     }
 
     data.cells.forEach((cell) => {
+        // On retrouve la cellule grâce à la combinaison salle + heure.
         const targetCell = availabilityCells.find((item) => (
             item.dataset.room === String(cell.room)
             && item.dataset.time === String(cell.time)
@@ -69,6 +75,7 @@ function applyAvailabilityData(data) {
 }
 
 async function refreshAvailabilityTable() {
+    // Appel périodique au serveur pour simuler un tableau de disponibilités en temps réel.
     if (!availabilityMatrix) {
         return;
     }
@@ -99,6 +106,7 @@ async function refreshAvailabilityTable() {
 }
 
 searchInput?.addEventListener('input', () => {
+    // Filtre instantané côté front : pratique pour chercher sans recharger la page.
     const query = searchInput.value.trim().toLowerCase();
 
     rows.forEach((row) => {
@@ -110,10 +118,12 @@ searchInput?.addEventListener('input', () => {
 });
 
 rows.forEach((row) => {
+    // Chaque bouton Modifier charge la ligne dans le formulaire situé à gauche.
     row.querySelector('[data-admin-edit]')?.addEventListener('click', () => fillEditForm(row));
 });
 
 document.querySelectorAll('[data-admin-delete-form]').forEach((form) => {
+    // Confirmation avant suppression définitive depuis une ligne du tableau.
     form.addEventListener('submit', (event) => {
         if (!window.confirm('Supprimer définitivement cette réservation ?')) {
             event.preventDefault();
@@ -122,16 +132,19 @@ document.querySelectorAll('[data-admin-delete-form]').forEach((form) => {
 });
 
 editForm?.querySelector('[data-admin-delete-current]')?.addEventListener('click', (event) => {
+    // Même protection quand on supprime depuis le panneau d'édition.
     if (!window.confirm('Supprimer définitivement la réservation sélectionnée ?')) {
         event.preventDefault();
     }
 });
 
 if (rows[0] && editForm) {
+    // Au chargement, la première réservation est directement prête à être modifiée.
     fillEditForm(rows[0]);
 }
 
 if (availabilityMatrix) {
+    // Mise à jour immédiate puis toutes les 10 secondes.
     refreshAvailabilityTable();
     setInterval(refreshAvailabilityTable, 10000);
 }
