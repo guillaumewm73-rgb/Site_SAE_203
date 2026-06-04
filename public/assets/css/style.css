@@ -980,14 +980,25 @@ a {
     font-weight: 800;
 }
 
+.visitor-grid .password-field {
+    display: grid;
+    gap: 8px;
+    font-weight: 800;
+}
+
 .slot-fields span,
 .visitor-grid span {
     color: var(--cyan);
     font-size: 14px;
 }
 
-.visitor-grid span {
+.visitor-grid span,
+.visitor-grid .password-field > label {
     color: var(--black);
+}
+
+.visitor-grid .password-field > label {
+    font-size: 14px;
 }
 
 .slot-fields select,
@@ -1001,6 +1012,62 @@ a {
     background: var(--white);
     color: var(--black);
     font: inherit;
+}
+
+.visitor-grid .password-input-wrap {
+    position: relative;
+    display: block;
+    color: var(--black);
+    font-size: inherit;
+}
+
+.visitor-grid .password-field input {
+    padding-right: 56px;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--black);
+    cursor: pointer;
+}
+
+.password-toggle:hover,
+.password-toggle:focus-visible {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.password-toggle:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+}
+
+.password-toggle svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.password-eye-slash {
+    opacity: 0;
+}
+
+.password-toggle.is-visible .password-eye-slash {
+    opacity: 1;
 }
 
 .slot-capacity {

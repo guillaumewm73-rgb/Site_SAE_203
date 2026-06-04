@@ -517,16 +517,33 @@ require __DIR__ . '/includes/header.php';
                         </label>
 
                         <?php if (!$isEditMode): ?>
-                            <label>
-                                <span>Mot de passe</span>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    autocomplete="new-password"
-                                    minlength="4"
-                                    required
-                                >
-                            </label>
+                            <div class="password-field">
+                                <label for="reservation-password">Mot de passe</label>
+                                <span class="password-input-wrap">
+                                    <input
+                                        id="reservation-password"
+                                        type="password"
+                                        name="password"
+                                        autocomplete="new-password"
+                                        minlength="4"
+                                        required
+                                        data-password-input
+                                    >
+                                    <button
+                                        class="password-toggle"
+                                        type="button"
+                                        aria-label="Afficher le mot de passe"
+                                        aria-pressed="false"
+                                        data-password-toggle
+                                    >
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                            <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"></path>
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                            <path class="password-eye-slash" d="M4 4l16 16"></path>
+                                        </svg>
+                                    </button>
+                                </span>
+                            </div>
                         <?php endif; ?>
 
                         <p class="visitor-grid-note">

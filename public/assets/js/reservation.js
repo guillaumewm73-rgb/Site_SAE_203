@@ -6,6 +6,8 @@ const slotList = document.querySelector('[data-slot-list]');
 const addSlotButton = document.querySelector('[data-add-slot]');
 const feedback = document.querySelector('[data-form-feedback]');
 const submitButton = document.querySelector('[data-submit-registration]');
+const passwordInput = document.querySelector('[data-password-input]');
+const passwordToggle = document.querySelector('[data-password-toggle]');
 
 function fillTimeOptions(timeSelect, day, currentValue) {
     const times = registrationData.days[day].times;
@@ -94,6 +96,22 @@ addSlotButton.addEventListener('click', () => {
     newSlot.querySelector('[data-slot-people]').value = '1';
     slotList.appendChild(newSlot);
     updateAllSlots();
+});
+
+passwordToggle?.addEventListener('click', () => {
+    if (!passwordInput) {
+        return;
+    }
+
+    const isVisible = passwordInput.type === 'text';
+
+    passwordInput.type = isVisible ? 'password' : 'text';
+    passwordToggle.classList.toggle('is-visible', !isVisible);
+    passwordToggle.setAttribute('aria-pressed', String(!isVisible));
+    passwordToggle.setAttribute(
+        'aria-label',
+        isVisible ? 'Afficher le mot de passe' : 'Masquer le mot de passe'
+    );
 });
 
 form.addEventListener('submit', (event) => {
