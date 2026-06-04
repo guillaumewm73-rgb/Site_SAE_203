@@ -67,10 +67,6 @@ require __DIR__ . '/includes/header.php';
                         Un parcours d’œuvres multimédia interactives où les perceptions
                         se déforment, se déclenchent et se partagent.
                     </p>
-                    <div class="hero-buttons">
-                        <a class="button button-primary" href="#reservation">Choisir un créneau</a>
-                        <a class="button button-secondary" href="#salles">Explorer les salles</a>
-                    </div>
                     <p class="highlight">Vernissage jeudi 18 juin, 19h</p>
                 </div>
 
@@ -84,6 +80,28 @@ require __DIR__ . '/includes/header.php';
                         ></button>
                     <?php endforeach; ?>
                 </div>
+            </div>
+        </section>
+
+        <section class="rooms-section" id="salles" aria-labelledby="rooms-title">
+            <div class="section-heading section-heading-dark">
+                <h2 id="rooms-title">4 salles, 4 expériences</h2>
+                <p>Chaque salle possède son concept, son contenu et sa jauge de réservation.</p>
+            </div>
+
+            <div class="room-grid">
+                <?php foreach ($rooms as $room): ?>
+                    <article class="room-card">
+                        <div class="room-title">
+                            <span class="red-dot"></span>
+                            <h3>Salle <?= e($room['number']); ?></h3>
+                        </div>
+                        <span class="room-badge"><?= e($room['badge']); ?></span>
+                        <h4><?= e($room['title']); ?></h4>
+                        <p><?= e($room['description']); ?></p>
+                        <a href="<?= e($room['href']); ?>">Voir la salle</a>
+                    </article>
+                <?php endforeach; ?>
             </div>
         </section>
 
@@ -110,39 +128,11 @@ require __DIR__ . '/includes/header.php';
                     </article>
                 <?php endforeach; ?>
             </div>
-        </section>
 
-        <section class="rooms-section" id="salles" aria-labelledby="rooms-title">
-            <div class="section-heading section-heading-dark">
-                <h2 id="rooms-title">4 salles, 4 expériences</h2>
-                <p>Chaque salle possède son concept, son contenu et sa jauge de réservation.</p>
+            <div class="visit-cta">
+                <p>Choisissez ensuite votre jour, votre heure, votre salle et le nombre de personnes depuis le formulaire.</p>
+                <a class="button button-primary" href="reservation.php">Commencer la réservation</a>
             </div>
-
-            <div class="room-grid">
-                <?php foreach ($rooms as $room): ?>
-                    <article class="room-card">
-                        <div class="room-title">
-                            <span class="red-dot"></span>
-                            <h3>Salle <?= e($room['number']); ?></h3>
-                        </div>
-                        <span class="room-badge"><?= e($room['badge']); ?></span>
-                        <h4><?= e($room['title']); ?></h4>
-                        <p><?= e($room['description']); ?></p>
-                        <a href="<?= e($room['href']); ?>">Voir la salle</a>
-                    </article>
-                <?php endforeach; ?>
-            </div>
-        </section>
-
-        <section class="reservation-preview" id="reservation" aria-labelledby="reservation-title">
-            <div>
-                <h2 id="reservation-title">Composer votre visite</h2>
-                <p>
-                    Ajoutez un créneau, choisissez le jour, l’heure et la salle.
-                    Vous pouvez réserver une ou plusieurs places selon les disponibilités.
-                </p>
-            </div>
-            <a class="button button-primary" href="reservation.php">Commencer la réservation</a>
         </section>
     </main>
 

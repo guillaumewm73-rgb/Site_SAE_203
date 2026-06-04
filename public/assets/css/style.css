@@ -233,7 +233,7 @@ a {
 
 .highlight {
     display: inline-block;
-    margin: 0;
+    margin: 24px 0 0;
 }
 
 .hero h1 {
@@ -340,19 +340,33 @@ a {
 }
 
 .time-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+    gap: 12px 22px;
 }
 
 .time-list span {
-    min-width: 76px;
-    padding: 10px 14px;
-    border: 1px solid var(--cyan);
-    border-radius: 6px;
+    position: relative;
+    min-width: 0;
+    padding-left: 18px;
+    border: 0;
+    border-radius: 0;
     color: var(--cyan);
-    text-align: center;
+    text-align: left;
     font-weight: 700;
+    cursor: default;
+}
+
+.time-list span::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--cyan);
+    transform: translateY(-50%);
 }
 
 .rooms-section {
@@ -457,6 +471,26 @@ a {
 .reservation-preview p {
     max-width: 760px;
     margin: 0;
+    font-size: 18px;
+    line-height: 1.45;
+}
+
+.visit-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    margin-top: 42px;
+    padding: 28px;
+    border-radius: 8px;
+    background: var(--black);
+    color: var(--white);
+}
+
+.visit-cta p {
+    max-width: 780px;
+    margin: 0;
+    color: var(--muted);
     font-size: 18px;
     line-height: 1.45;
 }
