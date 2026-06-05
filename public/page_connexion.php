@@ -162,12 +162,12 @@ require __DIR__ . '/includes/header.php';
                     <!-- Formulaire unique : il connecte soit un visiteur, soit un administrateur. -->
                     <form class="auth-form" method="post" action="page_connexion.php">
                         <label class="auth-field">
-                            <span>Email ou login admin</span>
+                            <span>Email</span>
                             <input
                                 type="text"
                                 name="contact_value"
                                 autocomplete="username"
-                                placeholder="prenom.nom@email.fr ou login admin"
+                                placeholder="prenom.nom@email.fr"
                                 required
                                 value="<?= e($enteredContact); ?>"
                             >
